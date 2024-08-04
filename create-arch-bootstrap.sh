@@ -20,22 +20,22 @@ wine_pkgs="libpng gnutls openal \
 	v4l-utils libpulse alsa-plugins \
 	alsa-lib libjpeg-turbo \
 	libxcomposite \
-	libva wget \
+	libva \
 	vulkan-icd-loader sdl2 \
 	vkd3d ffmpeg gst-plugins-good gst-plugins-bad \
 	gst-plugins-ugly gst-plugins-base \
 	gst-libav wget gst-plugin-pipewire"
 
-devel_pkgs="base-devel git meson mingw-w64-gcc cmake gtk3"
+devel_pkgs="base-devel git meson mingw-w64-gcc cmake"
 
 # Packages to install
 # You can add packages that you want and remove packages that you don't need
 # Apart from packages from the official Arch repos, you can also specify
 # packages from the Chaotic-AUR repo
-export packagelist="${audio_pkgs} libpng gnutls openal \
-	which ttf-dejavu ttf-liberation xorg-xwayland wayland \
-	xorg-server xorg-apps curl virtualbox-kvm v4l-utils \
- 	kvantum kvantum-qt5 qt5ct qt6ct libva sdl2 vulkan-icd-loader"
+export packagelist="${audio_pkgs} vulkan-icd-loader sdl2 libva libpng gnutls openal \
+	which ttf-dejavu ttf-liberation xorg-xwayland wayland xdg-user-dirs \
+	xorg-server xorg-apps curl gnome-boxes qemu-desktop hicolor-icon-theme \
+	gtk3 gtk4 libadwaita xapp libvirt libusb ibus"
 
 # If you want to install AUR packages, specify them in this variable
 export aur_packagelist=""
@@ -379,19 +379,17 @@ run_in_chroot pacman -Q > "${bootstrap}"/pkglist.x86_64.txt
 run_in_chroot rm -f "${bootstrap}"/etc/locale.conf
 run_in_chroot sed -i 's/LANG=${LANG:-C}/LANG=$LANG/g' /etc/profile.d/locale.sh
 
-# Add guest additions
-vboxver=$(curl -Ls https://gitlab.com/chaotic-aur/pkgbuilds/-/raw/main/virtualbox-kvm/PKGBUILD | grep vboxver | head -1 | tr "'" '\n' | grep "^[0-9]")
-wget https://download.virtualbox.org/virtualbox/"${vboxver}"/VBoxGuestAdditions_"${vboxver}".iso -O ./VBoxGuestAdditions.iso || exit 1
-mkdir -p "${bootstrap}"/usr/lib/virtualbox/additions
-mv VBoxGuestAdditions.iso "${bootstrap}"/usr/lib/virtualbox/additions/ || exit 1
+# Try to fix GTK/GDK error messages
+cp "${bootstrap}"/usr/lib/gtk-3.0/3.0.0/immodules/im-ibus.so "${bootstrap}"/usr/lib/
+cp "${bootstrap}"/usr/lib/gdk-pixbuf-2.0/2.10.0/loaders/libpixbufloader-* "${bootstrap}"/usr/lib/
 
 # Remove bloatwares
 run_in_chroot rm -Rf /usr/include /usr/share/man
-run_in_chroot bash -c 'find "${bootstrap}"/usr/share/doc/* -not -iname "*virtualbox*" -a -not -name "." -delete'
-run_in_chroot bash -c 'find "${bootstrap}"/usr/share/locale/*/*/* -not -iname "*virtualbox*" -a -not -name "." -delete'
+run_in_chroot bash -c 'find "${bootstrap}"/usr/share/doc/* -not -iname "*gnome-boxes*" -a -not -name "." -delete'
+run_in_chroot bash -c 'find "${bootstrap}"/usr/share/locale/*/*/* -not -iname "*gnome-boxes*" -a -not -name "." -delete'
 
 # Check if the command we are interested in has been installed
-if ! run_in_chroot which virtualbox; then echo "Command not found, exiting." && exit 1; fi
+if ! run_in_chroot which gnome-boxes; then echo "Command not found, exiting." && exit 1; fi
 
 # Exit chroot
 rm -rf "${bootstrap}"/home/aur
