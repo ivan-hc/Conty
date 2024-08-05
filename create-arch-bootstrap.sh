@@ -43,14 +43,11 @@ devel_pkgs="base-devel git meson mingw-w64-gcc cmake"
 # You can add packages that you want and remove packages that you don't need
 # Apart from packages from the official Arch repos, you can also specify
 # packages from the Chaotic-AUR repo
-export packagelist="${audio_pkgs} ${wine32_pkgs} ${devel_pkgs} \
-	ttf-dejavu ttf-liberation xorg-xwayland gamemode lib32-gamemode wayland \
-	lib32-wayland xorg-server xorg-apps which ibus libpng v4l-utils libxslt \
- 	vulkan-icd-loader lib32-vulkan-icd-loader gnutls openal libjpeg-turbo \
-	libva sdl2"
+export packagelist="${devel_pkgs} \
+	ttf-dejavu ttf-liberation"
 
 # If you want to install AUR packages, specify them in this variable
-export aur_packagelist="bottles"
+export aur_packagelist="webapp-manager"
 
 # ALHP is a repository containing packages from the official Arch Linux
 # repos recompiled with -O3, LTO and optimizations for modern CPUs for
