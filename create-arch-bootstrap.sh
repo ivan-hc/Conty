@@ -395,11 +395,11 @@ cp "${bootstrap}"/usr/lib/gdk-pixbuf-2.0/2.10.0/loaders/libpixbufloader-* "${boo
 # Remove bloatwares
 run_in_chroot pacman --noconfirm -Rsndd gcc
 run_in_chroot rm -Rf /usr/include /usr/share/man /usr/share/gtk-doc /usr/lib/gcc /usr/bin/gcc*
-run_in_chroot bash -c 'find "${bootstrap}"/usr/share/doc/* -not -iname "*bottles*" -a -not -name "." -delete'
-run_in_chroot bash -c 'find "${bootstrap}"/usr/share/locale/*/*/* -not -iname "*bottles*" -a -not -name "." -delete'
+run_in_chroot bash -c 'find "${bootstrap}"/usr/share/doc/* -not -iname "*webapp-manager*" -a -not -name "." -delete'
+run_in_chroot bash -c 'find "${bootstrap}"/usr/share/locale/*/*/* -not -iname "*webapp-manager*" -a -not -name "." -delete'
 
 # Check if the command we are interested in has been installed
-if ! run_in_chroot which bottles; then echo "Command not found, exiting." && exit 1; fi
+if ! run_in_chroot which webapp-manager; then echo "Command not found, exiting." && exit 1; fi
 
 # Exit chroot
 rm -rf "${bootstrap}"/home/aur
