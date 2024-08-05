@@ -34,9 +34,8 @@ devel_pkgs="base-devel git meson mingw-w64-gcc cmake gtk3"
 # packages from the Chaotic-AUR repo
 export packagelist="${audio_pkgs} libpng gnutls openal \
 	which ttf-dejavu ttf-liberation xorg-xwayland wayland \
-	xorg-server xorg-apps curl virtualbox v4l-utils \
- 	kvantum kvantum-qt5 qt5ct qt6ct libva sdl2 vulkan-icd-loader \
- 	virtualbox-guest-iso virtualbox-host-dkms"
+	xorg-server xorg-apps curl virtualbox-kvm v4l-utils \
+ 	kvantum kvantum-qt5 qt5ct qt6ct libva sdl2 vulkan-icd-loader"
 
 # If you want to install AUR packages, specify them in this variable
 export aur_packagelist=""
@@ -380,22 +379,14 @@ run_in_chroot pacman -Q > "${bootstrap}"/pkglist.x86_64.txt
 run_in_chroot rm -f "${bootstrap}"/etc/locale.conf
 run_in_chroot sed -i 's/LANG=${LANG:-C}/LANG=$LANG/g' /etc/profile.d/locale.sh
 
-# Add guest additions
-vboxver=$(curl -Ls https://archlinux.org/packages/extra/x86_64/virtualbox/ | grep virtualbox | head -1 | tr ' ' '\n' | grep "^[0-9]")
-#wget https://download.virtualbox.org/virtualbox/"${vboxver}"/VBoxGuestAdditions_"${vboxver}".iso -O ./VBoxGuestAdditions.iso || exit 1
-#mkdir -p "${bootstrap}"/usr/lib/virtualbox/additions
-#mv VBoxGuestAdditions.iso "${bootstrap}"/usr/lib/virtualbox/additions/ || exit 1
+# Fix locale
+cp "${bootstrap}"/usr/share/virtualbox/nls "${bootstrap}"/usr/lib/virtualbox/
 
-# Add extension pack
-wget https://download.virtualbox.org/virtualbox/"${vboxver}"/Oracle_VM_VirtualBox_Extension_Pack-"${vboxver}".vbox-extpack -O ./Extension_Pack.tar
-mkdir -p shrunk
-tar xfC ./Extension_Pack.tar shrunk
-rm -r shrunk/{darwin*,solaris*,win*}
-tar -c --gzip --file shrunk.vbox-extpack -C shrunk .
-install -Dm 644 shrunk.vbox-extpack \
-	"${bootstrap}"/usr/share/virtualbox/extensions/Oracle_VM_VirtualBox_Extension_Pack-"${vboxver}".vbox-extpack
-install -Dm 644 shrunk/ExtPack-license.txt \
-	"${bootstrap}"/usr/share/licenses/virtualbox-ext-oracle/PUEL
+# Add guest additions
+vboxver=$(curl -Ls https://gitlab.com/chaotic-aur/pkgbuilds/-/raw/main/virtualbox-kvm/PKGBUILD | grep vboxver | head -1 | tr "'" '\n' | grep "^[0-9]")
+wget https://download.virtualbox.org/virtualbox/"${vboxver}"/VBoxGuestAdditions_"${vboxver}".iso -O ./VBoxGuestAdditions.iso || exit 1
+mkdir -p "${bootstrap}"/usr/lib/virtualbox/additions
+mv VBoxGuestAdditions.iso "${bootstrap}"/usr/lib/virtualbox/additions/ || exit 1
 
 # Remove bloatwares
 run_in_chroot rm -Rf /usr/include /usr/share/man
