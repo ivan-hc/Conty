@@ -381,7 +381,7 @@ run_in_chroot sed -i 's/LANG=${LANG:-C}/LANG=$LANG/g' /etc/profile.d/locale.sh
 
 # Fix locale
 mkdir -p "${bootstrap}"/usr/lib/virtualbox/nls
-rsync -av "${bootstrap}"/usr/share/virtualbox/nls/* "${bootstrap}"/usr/lib/virtualbox/nls/*
+rsync -av "${bootstrap}"/usr/share/virtualbox/nls/* "${bootstrap}"/usr/lib/virtualbox/nls/
 
 # Add guest additions
 vboxver=$(curl -Ls https://gitlab.com/chaotic-aur/pkgbuilds/-/raw/main/virtualbox-kvm/PKGBUILD | grep vboxver | head -1 | tr "'" '\n' | grep "^[0-9]")
