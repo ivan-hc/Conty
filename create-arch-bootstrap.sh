@@ -43,11 +43,10 @@ devel_pkgs="base-devel git meson mingw-w64-gcc cmake"
 # You can add packages that you want and remove packages that you don't need
 # Apart from packages from the official Arch repos, you can also specify
 # packages from the Chaotic-AUR repo
-export packagelist="${devel_pkgs} \
-	ttf-dejavu ttf-liberation"
+export packagelist="${devel_pkgs} ttf-dejavu ttf-liberation webapp-manager"
 
 # If you want to install AUR packages, specify them in this variable
-export aur_packagelist="webapp-manager"
+export aur_packagelist=""
 
 # ALHP is a repository containing packages from the official Arch Linux
 # repos recompiled with -O3, LTO and optimizations for modern CPUs for
