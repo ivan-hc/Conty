@@ -6,44 +6,32 @@
 ########################################################################
 
 # Package groups
-audio_pkgs="alsa-lib lib32-alsa-lib alsa-plugins lib32-alsa-plugins libpulse \
-	lib32-libpulse jack2 lib32-jack2 alsa-tools alsa-utils pipewire \
-	lib32-pipewire"
+audio_pkgs="alsa-lib libpulse jack2 pipewire"
 
-video_pkgs="mesa lib32-mesa vulkan-radeon lib32-vulkan-radeon \
-	vulkan-intel lib32-vulkan-intel \
-	vulkan-icd-loader lib32-vulkan-icd-loader vulkan-mesa-layers \
+video_pkgs="mesa lib32-mesa vulkan-radeon lib32-vulkan-radeon vulkan-intel \
+	lib32-vulkan-intel vulkan-icd-loader lib32-vulkan-icd-loader vulkan-mesa-layers \
 	lib32-vulkan-mesa-layers libva-mesa-driver lib32-libva-mesa-driver \
-	libva-intel-driver lib32-libva-intel-driver intel-media-driver \
-	mesa-utils vulkan-tools libva-utils lib32-mesa-utils"
+	libva-intel-driver lib32-libva-intel-driver intel-media-driver"
 
-wine_pkgs="wine-staging winetricks-git wine-nine wineasio \
-	giflib lib32-giflib libpng lib32-libpng libldap lib32-libldap \
-	gnutls lib32-gnutls mpg123 lib32-mpg123 openal lib32-openal \
-	v4l-utils lib32-v4l-utils libpulse lib32-libpulse alsa-plugins \
-	lib32-alsa-plugins alsa-lib lib32-alsa-lib libjpeg-turbo \
+wine_pkgs="giflib lib32-giflib libpng lib32-libpng libldap lib32-libldap \
+	gnutls lib32-gnutls mpg123 lib32-mpg123 \
+	v4l-utils lib32-v4l-utils libpulse lib32-libpulse \
+	alsa-lib lib32-alsa-lib libjpeg-turbo \
 	lib32-libjpeg-turbo libxcomposite lib32-libxcomposite libxinerama \
-	lib32-libxinerama libxslt lib32-libxslt libva lib32-libva gtk3 \
-	lib32-gtk3 vulkan-icd-loader lib32-vulkan-icd-loader sdl2 lib32-sdl2 \
-	vkd3d lib32-vkd3d libgphoto2 ffmpeg gst-plugins-good gst-plugins-bad \
+	libxslt lib32-libxslt libva lib32-libva \
+	vulkan-icd-loader lib32-vulkan-icd-loader \
+	vkd3d lib32-vkd3d libgphoto2 ffmpeg gst-plugins-good \
 	gst-plugins-ugly gst-plugins-base lib32-gst-plugins-good \
 	lib32-gst-plugins-base gst-libav wget gst-plugin-pipewire"
 
-wine32_pkgs="lib32-giflib lib32-libpng lib32-libldap lib32-gnutls mpg123 \
-	lib32-mpg123 lib32-openal lib32-v4l-utils lib32-libpulse \
-	lib32-alsa-plugins lib32-alsa-lib \
-	lib32-libjpeg-turbo lib32-libxcomposite \
-	lib32-libxinerama lib32-libxslt lib32-libva gtk3 \
-	lib32-gtk3 lib32-sdl2 lib32-vkd3d lib32-gst-plugins-good \
-	lib32-gst-plugins-base"
-
-devel_pkgs="base-devel git meson mingw-w64-gcc cmake"
+devel_pkgs="base-devel"
 
 # Packages to install
 # You can add packages that you want and remove packages that you don't need
 # Apart from packages from the official Arch repos, you can also specify
 # packages from the Chaotic-AUR repo
-export packagelist="which ttf-dejavu ttf-liberation webapp-manager"
+export packagelist="${audio_pkgs} \
+	which ttf-dejavu ttf-liberation hypnotix"
 
 # If you want to install AUR packages, specify them in this variable
 export aur_packagelist=""
@@ -375,10 +363,11 @@ fi
 #run_in_chroot locale-gen
 
 # Remove unneeded packages
-run_in_chroot pacman --noconfirm -Rsu base-devel meson mingw-w64-gcc cmake gcc
+run_in_chroot pacman --noconfirm -Rsu base-devel meson mingw-w64-gcc cmake gcc gtk4
 run_in_chroot pacman --noconfirm -Rdd wine-staging
 run_in_chroot pacman -Qdtq | run_in_chroot pacman --noconfirm -Rsn -
 run_in_chroot pacman --noconfirm -Scc
+  
 
 # Generate a list of installed packages
 run_in_chroot pacman -Q > "${bootstrap}"/pkglist.x86_64.txt
@@ -387,18 +376,14 @@ run_in_chroot pacman -Q > "${bootstrap}"/pkglist.x86_64.txt
 run_in_chroot rm -f "${bootstrap}"/etc/locale.conf
 run_in_chroot sed -i 's/LANG=${LANG:-C}/LANG=$LANG/g' /etc/profile.d/locale.sh
 
-# Try to fix GTK/GDK error messages
-cp "${bootstrap}"/usr/lib/gtk-3.0/3.0.0/immodules/im-ibus.so "${bootstrap}"/usr/lib/
-cp "${bootstrap}"/usr/lib/gdk-pixbuf-2.0/2.10.0/loaders/libpixbufloader-* "${bootstrap}"/usr/lib/
-
 # Remove bloatwares
 run_in_chroot pacman --noconfirm -Rsndd gcc
 run_in_chroot rm -Rf /usr/include /usr/share/man /usr/share/gtk-doc /usr/lib/gcc /usr/bin/gcc*
-run_in_chroot bash -c 'find "${bootstrap}"/usr/share/doc/* -not -iname "*webapp-manager*" -a -not -name "." -delete'
-run_in_chroot bash -c 'find "${bootstrap}"/usr/share/locale/*/*/* -not -iname "*webapp-manager*" -a -not -name "." -delete'
+run_in_chroot bash -c 'find "${bootstrap}"/usr/share/doc/* -not -iname "*hypnotix*" -a -not -name "." -delete'
+run_in_chroot bash -c 'find "${bootstrap}"/usr/share/locale/*/*/* -not -iname "*hypnotix*" -a -not -name "." -delete'
 
 # Check if the command we are interested in has been installed
-if ! run_in_chroot which webapp-manager; then echo "Command not found, exiting." && exit 1; fi
+if ! run_in_chroot which hypnotix; then echo "Command not found, exiting." && exit 1; fi
 
 # Exit chroot
 rm -rf "${bootstrap}"/home/aur
