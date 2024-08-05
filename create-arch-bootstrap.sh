@@ -17,11 +17,6 @@ video_pkgs="mesa lib32-mesa vulkan-radeon lib32-vulkan-radeon \
 	libva-intel-driver lib32-libva-intel-driver intel-media-driver \
 	mesa-utils vulkan-tools libva-utils lib32-mesa-utils"
 
-vulkan_pkgs="vulkan-radeon lib32-vulkan-radeon \
-	vulkan-intel lib32-vulkan-intel \
-	vulkan-icd-loader lib32-vulkan-icd-loader vulkan-mesa-layers \
-	lib32-vulkan-mesa-layers vulkan-tools vkd3d lib32-vkd3d"
-
 wine_pkgs="wine-staging winetricks-git wine-nine wineasio \
 	giflib lib32-giflib libpng lib32-libpng libldap lib32-libldap \
 	gnutls lib32-gnutls mpg123 lib32-mpg123 openal lib32-openal \
@@ -48,10 +43,11 @@ devel_pkgs="base-devel git meson mingw-w64-gcc cmake"
 # You can add packages that you want and remove packages that you don't need
 # Apart from packages from the official Arch repos, you can also specify
 # packages from the Chaotic-AUR repo
-export packagelist="${audio_pkgs} ${wine32_pkgs} ${devel_pkgs} ${vulkan_pkgs} \
+export packagelist="${audio_pkgs} ${wine32_pkgs} ${devel_pkgs} \
 	ttf-dejavu ttf-liberation xorg-xwayland gamemode lib32-gamemode wayland \
 	lib32-wayland xorg-server xorg-apps which ibus libpng v4l-utils libxslt \
- 	gnutls openal libjpeg-turbo libva sdl2"
+ 	vulkan-icd-loader lib32-vulkan-icd-loader gnutls openal libjpeg-turbo \
+	libva sdl2"
 
 # If you want to install AUR packages, specify them in this variable
 export aur_packagelist="bottles"
