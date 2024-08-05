@@ -6,32 +6,37 @@
 ########################################################################
 
 # Package groups
-audio_pkgs="alsa-lib libpulse jack2 pipewire"
+audio_pkgs="alsa-lib alsa-plugins libpulse \
+	jack2 alsa-tools alsa-utils pipewire"
 
-video_pkgs="mesa lib32-mesa vulkan-radeon lib32-vulkan-radeon vulkan-intel \
-	lib32-vulkan-intel vulkan-icd-loader lib32-vulkan-icd-loader vulkan-mesa-layers \
-	lib32-vulkan-mesa-layers libva-mesa-driver lib32-libva-mesa-driver \
-	libva-intel-driver lib32-libva-intel-driver intel-media-driver"
+video_pkgs="mesa vulkan-radeon \
+	vulkan-intel \
+	vulkan-icd-loader vulkan-mesa-layers \
+	libva-mesa-driver \
+	libva-intel-driver intel-media-driver \
+	mesa-utils vulkan-tools libva-utils"
 
-wine_pkgs="giflib lib32-giflib libpng lib32-libpng libldap lib32-libldap \
-	gnutls lib32-gnutls mpg123 lib32-mpg123 \
-	v4l-utils lib32-v4l-utils libpulse lib32-libpulse \
-	alsa-lib lib32-alsa-lib libjpeg-turbo \
-	lib32-libjpeg-turbo libxcomposite lib32-libxcomposite libxinerama \
-	libxslt lib32-libxslt libva lib32-libva \
-	vulkan-icd-loader lib32-vulkan-icd-loader \
-	vkd3d lib32-vkd3d libgphoto2 ffmpeg gst-plugins-good \
-	gst-plugins-ugly gst-plugins-base lib32-gst-plugins-good \
-	lib32-gst-plugins-base gst-libav wget gst-plugin-pipewire"
+wine_pkgs="libpng gnutls openal \
+	v4l-utils libpulse alsa-plugins \
+	alsa-lib libjpeg-turbo \
+	libxcomposite \
+	libva wget \
+	vulkan-icd-loader sdl2 \
+	vkd3d ffmpeg gst-plugins-good gst-plugins-bad \
+	gst-plugins-ugly gst-plugins-base \
+	gst-libav wget gst-plugin-pipewire"
 
-devel_pkgs="base-devel"
+devel_pkgs="base-devel git meson mingw-w64-gcc cmake gtk3"
 
 # Packages to install
 # You can add packages that you want and remove packages that you don't need
 # Apart from packages from the official Arch repos, you can also specify
 # packages from the Chaotic-AUR repo
-export packagelist="${audio_pkgs} \
-	which ttf-dejavu ttf-liberation hypnotix"
+export packagelist="${audio_pkgs} libpng gnutls openal \
+	which ttf-dejavu ttf-liberation xorg-xwayland wayland \
+	xorg-server xorg-apps curl virtualbox v4l-utils \
+ 	kvantum kvantum-qt5 qt5ct qt6ct libva sdl2 vulkan-icd-loader \
+ 	virtualbox-guest-iso virtualbox-host-dkms"
 
 # If you want to install AUR packages, specify them in this variable
 export aur_packagelist=""
@@ -363,11 +368,10 @@ fi
 #run_in_chroot locale-gen
 
 # Remove unneeded packages
-run_in_chroot pacman --noconfirm -Rsu base-devel meson mingw-w64-gcc cmake gcc gtk4
+run_in_chroot pacman --noconfirm -Rsudd base-devel meson mingw-w64-gcc cmake gcc
 run_in_chroot pacman --noconfirm -Rdd wine-staging
 run_in_chroot pacman -Qdtq | run_in_chroot pacman --noconfirm -Rsn -
 run_in_chroot pacman --noconfirm -Scc
-  
 
 # Generate a list of installed packages
 run_in_chroot pacman -Q > "${bootstrap}"/pkglist.x86_64.txt
@@ -376,14 +380,30 @@ run_in_chroot pacman -Q > "${bootstrap}"/pkglist.x86_64.txt
 run_in_chroot rm -f "${bootstrap}"/etc/locale.conf
 run_in_chroot sed -i 's/LANG=${LANG:-C}/LANG=$LANG/g' /etc/profile.d/locale.sh
 
+# Add guest additions
+vboxver=$(curl -Ls https://archlinux.org/packages/extra/x86_64/virtualbox/ | grep virtualbox | head -1 | tr ' ' '\n' | grep "^[0-9]")
+#wget https://download.virtualbox.org/virtualbox/"${vboxver}"/VBoxGuestAdditions_"${vboxver}".iso -O ./VBoxGuestAdditions.iso || exit 1
+#mkdir -p "${bootstrap}"/usr/lib/virtualbox/additions
+#mv VBoxGuestAdditions.iso "${bootstrap}"/usr/lib/virtualbox/additions/ || exit 1
+
+# Add extension pack
+wget https://download.virtualbox.org/virtualbox/"${vboxver}"/Oracle_VM_VirtualBox_Extension_Pack-"${vboxver}".vbox-extpack -O ./Extension_Pack.tar
+mkdir -p shrunk
+tar xfC ./Extension_Pack.tar shrunk
+rm -r shrunk/{darwin*,solaris*,win*}
+tar -c --gzip --file shrunk.vbox-extpack -C shrunk .
+install -Dm 644 shrunk.vbox-extpack \
+	"${bootstrap}"/usr/share/virtualbox/extensions/Oracle_VM_VirtualBox_Extension_Pack-"${vboxver}".vbox-extpack
+install -Dm 644 shrunk/ExtPack-license.txt \
+	"${bootstrap}"/usr/share/licenses/virtualbox-ext-oracle/PUEL
+
 # Remove bloatwares
-run_in_chroot pacman --noconfirm -Rsndd gcc
-run_in_chroot rm -Rf /usr/include /usr/share/man /usr/share/gtk-doc /usr/lib/gcc /usr/bin/gcc*
-run_in_chroot bash -c 'find "${bootstrap}"/usr/share/doc/* -not -iname "*hypnotix*" -a -not -name "." -delete'
-run_in_chroot bash -c 'find "${bootstrap}"/usr/share/locale/*/*/* -not -iname "*hypnotix*" -a -not -name "." -delete'
+run_in_chroot rm -Rf /usr/include /usr/share/man
+run_in_chroot bash -c 'find "${bootstrap}"/usr/share/doc/* -not -iname "*virtualbox*" -a -not -name "." -delete'
+run_in_chroot bash -c 'find "${bootstrap}"/usr/share/locale/*/*/* -not -iname "*virtualbox*" -a -not -name "." -delete'
 
 # Check if the command we are interested in has been installed
-if ! run_in_chroot which hypnotix; then echo "Command not found, exiting." && exit 1; fi
+if ! run_in_chroot which virtualbox; then echo "Command not found, exiting." && exit 1; fi
 
 # Exit chroot
 rm -rf "${bootstrap}"/home/aur
