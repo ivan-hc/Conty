@@ -396,9 +396,11 @@ tar xfC ./Extension_Pack.tar shrunk
 rm -r shrunk/{darwin*,solaris*,win*}
 tar -c --gzip --file shrunk.vbox-extpack -C shrunk .
 install -Dm 644 shrunk.vbox-extpack \
-	"${bootstrap}"/usr/lib/virtualbox/ExtensionPacks/Oracle_VM_VirtualBox_Extension_Pack-"${vboxver}".vbox-extpack
+	"${bootstrap}"/usr/share/virtualbox/extensions/Oracle_VM_VirtualBox_Extension_Pack-"${vboxver}".vbox-extpack
 install -Dm 644 shrunk/ExtPack-license.txt \
 	"${bootstrap}"/usr/share/licenses/virtualbox-ext-oracle/PUEL
+install -Dm 644 shrunk/linux.amd64/* \
+	"${bootstrap}"/usr/lib/virtualbox/
 
 # Remove bloatwares
 run_in_chroot rm -Rf /usr/include /usr/share/man
