@@ -399,9 +399,11 @@ install -Dm 644 shrunk.vbox-extpack \
 	"${bootstrap}"/usr/share/virtualbox/extensions/Oracle_VM_VirtualBox_Extension_Pack-"${vboxver}".vbox-extpack
 install -Dm 644 shrunk/ExtPack-license.txt \
 	"${bootstrap}"/usr/share/licenses/virtualbox-ext-oracle/PUEL
-mkdir -p "${bootstrap}"/usr/lib/virtualbox/ExtensionPacks/Oracle_VM_VirtualBox_Extension_Pack
+mkdir -p "${bootstrap}"/usr/lib/virtualbox/ExtensionPacks/Oracle_VM_VirtualBox_Extension_Pack/linux.amd64
 install -Dm 644 shrunk/* \
 	"${bootstrap}"/usr/lib/virtualbox/ExtensionPacks/Oracle_VM_VirtualBox_Extension_Pack/
+install -Dm 644 shrunk/linux.amd64/* \
+	"${bootstrap}"/usr/lib/virtualbox/ExtensionPacks/Oracle_VM_VirtualBox_Extension_Pack/linux.amd64/
 
 # Remove bloatwares
 run_in_chroot rm -Rf /usr/include /usr/share/man
