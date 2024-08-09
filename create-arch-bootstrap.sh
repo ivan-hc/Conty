@@ -35,8 +35,7 @@ devel_pkgs="base-devel git meson mingw-w64-gcc cmake gtk3"
 export packagelist="${audio_pkgs} libpng gnutls openal \
 	which ttf-dejavu ttf-liberation xorg-xwayland wayland \
 	xorg-server xorg-apps curl virtualbox-kvm v4l-utils \
- 	kvantum kvantum-qt5 qt5ct qt6ct libva sdl2 vulkan-icd-loader \
- 	libusb-compat usbutils usb_modeswitch python-pyusb"
+ 	kvantum kvantum-qt5 qt5ct qt6ct libva sdl2 vulkan-icd-loader"
 
 # If you want to install AUR packages, specify them in this variable
 export aur_packagelist=""
@@ -383,9 +382,6 @@ run_in_chroot sed -i 's/LANG=${LANG:-C}/LANG=$LANG/g' /etc/profile.d/locale.sh
 # Fix locale
 mkdir -p "${bootstrap}"/usr/lib/virtualbox/nls
 rsync -av "${bootstrap}"/usr/share/virtualbox/nls/* "${bootstrap}"/usr/lib/virtualbox/nls/
-
-# Copy scripts from /usr/share/virtualbox to /usr/lib/virtualbox
-rsync -av "${bootstrap}"/usr/share/virtualbox/VBox* "${bootstrap}"/usr/lib/virtualbox/
 
 # Add guest additions
 vboxver=$(curl -Ls https://gitlab.com/chaotic-aur/pkgbuilds/-/raw/main/virtualbox-kvm/PKGBUILD | grep vboxver | head -1 | tr "'" '\n' | grep "^[0-9]")
