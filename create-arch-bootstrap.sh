@@ -35,7 +35,8 @@ devel_pkgs="base-devel git meson mingw-w64-gcc cmake gtk3"
 export packagelist="${audio_pkgs} libpng gnutls openal \
 	which ttf-dejavu ttf-liberation xorg-xwayland wayland \
 	xorg-server xorg-apps curl virtualbox-kvm v4l-utils \
- 	kvantum kvantum-qt5 qt5ct qt6ct libva sdl2 vulkan-icd-loader"
+ 	kvantum kvantum-qt5 qt5ct qt6ct libva sdl2 vulkan-icd-loader \
+ 	libusb-compat usbutils usb_modeswitch python-pyusb"
 
 # If you want to install AUR packages, specify them in this variable
 export aur_packagelist=""
