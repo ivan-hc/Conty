@@ -383,6 +383,9 @@ run_in_chroot sed -i 's/LANG=${LANG:-C}/LANG=$LANG/g' /etc/profile.d/locale.sh
 mkdir -p "${bootstrap}"/usr/lib/virtualbox/nls
 rsync -av "${bootstrap}"/usr/share/virtualbox/nls/* "${bootstrap}"/usr/lib/virtualbox/nls/
 
+# Copy scripts from /usr/share/virtualbox to /usr/lib/virtualbox
+rsync -av "${bootstrap}"/usr/share/virtualbox/VBox* "${bootstrap}"/usr/lib/virtualbox/
+
 # Add guest additions
 vboxver=$(curl -Ls https://gitlab.com/chaotic-aur/pkgbuilds/-/raw/main/virtualbox-kvm/PKGBUILD | grep vboxver | head -1 | tr "'" '\n' | grep "^[0-9]")
 wget https://download.virtualbox.org/virtualbox/"${vboxver}"/VBoxGuestAdditions_"${vboxver}".iso -O ./VBoxGuestAdditions.iso || exit 1
@@ -390,29 +393,20 @@ mkdir -p "${bootstrap}"/usr/lib/virtualbox/additions
 mv VBoxGuestAdditions.iso "${bootstrap}"/usr/lib/virtualbox/additions/ || exit 1
 
 # Add extension pack
-wget https://download.virtualbox.org/virtualbox/"${vboxver}"/Oracle_VM_VirtualBox_Extension_Pack-"${vboxver}".vbox-extpack -O ./Extension_Pack.tar
-mkdir -p shrunk
-tar xfC ./Extension_Pack.tar shrunk
-rm -r shrunk/{darwin*,solaris*,win*}
-tar -c --gzip --file shrunk.vbox-extpack -C shrunk .
-install -Dm 644 shrunk.vbox-extpack \
-	"${bootstrap}"/usr/share/virtualbox/extensions/Oracle_VM_VirtualBox_Extension_Pack-"${vboxver}".vbox-extpack
-install -Dm 644 shrunk/ExtPack-license.txt \
-	"${bootstrap}"/usr/share/licenses/virtualbox-ext-oracle/PUEL
-mkdir -p "${bootstrap}"/usr/lib/virtualbox/ExtensionPacks/Oracle_VM_VirtualBox_Extension_Pack/linux.amd64
-install -Dm 644 shrunk/* \
-	"${bootstrap}"/usr/lib/virtualbox/ExtensionPacks/Oracle_VM_VirtualBox_Extension_Pack/
-install -Dm 644 shrunk/linux.amd64/* \
-	"${bootstrap}"/usr/lib/virtualbox/ExtensionPacks/Oracle_VM_VirtualBox_Extension_Pack/linux.amd64/
-
-# Add udev rules
-cat >> 60-vboxusb.rules << 'EOF'
-SUBSYSTEM=="usb_device", ACTION=="add", RUN+="/usr/lib/virtualbox/VBoxCreateUSBNode.sh $major $minor $attr{bDeviceClass}"
-SUBSYSTEM=="usb", ACTION=="add", ENV{DEVTYPE}=="usb_device", RUN+="/usr/lib/virtualbox/VBoxCreateUSBNode.sh $major $minor $attr{bDeviceClass}"
-SUBSYSTEM=="usb_device", ACTION=="remove", RUN+="/usr/lib/virtualbox/VBoxCreateUSBNode.sh --remove $major $minor"
-SUBSYSTEM=="usb", ACTION=="remove", ENV{DEVTYPE}=="usb_device", RUN+="/usr/lib/virtualbox/VBoxCreateUSBNode.sh --remove $major $minor"
-EOF
-mv ./60-vboxusb.rules "${bootstrap}"/etc/udev/rules.d/
+#wget https://download.virtualbox.org/virtualbox/"${vboxver}"/Oracle_VM_VirtualBox_Extension_Pack-"${vboxver}".vbox-extpack -O ./Extension_Pack.tar
+#mkdir -p shrunk
+#tar xfC ./Extension_Pack.tar shrunk
+#rm -r shrunk/{darwin*,solaris*,win*}
+#tar -c --gzip --file shrunk.vbox-extpack -C shrunk .
+#install -Dm 644 shrunk.vbox-extpack \
+#	"${bootstrap}"/usr/share/virtualbox/extensions/Oracle_VM_VirtualBox_Extension_Pack-"${vboxver}".vbox-extpack
+#install -Dm 644 shrunk/ExtPack-license.txt \
+#	"${bootstrap}"/usr/share/licenses/virtualbox-ext-oracle/PUEL
+#mkdir -p "${bootstrap}"/usr/lib/virtualbox/ExtensionPacks/Oracle_VM_VirtualBox_Extension_Pack/linux.amd64
+#install -Dm 644 shrunk/* \
+#	"${bootstrap}"/usr/lib/virtualbox/ExtensionPacks/Oracle_VM_VirtualBox_Extension_Pack/
+#install -Dm 644 shrunk/linux.amd64/* \
+#	"${bootstrap}"/usr/lib/virtualbox/ExtensionPacks/Oracle_VM_VirtualBox_Extension_Pack/linux.amd64/
 
 # Remove bloatwares
 run_in_chroot rm -Rf /usr/include /usr/share/man
