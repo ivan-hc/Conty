@@ -5,34 +5,41 @@
 
 ########################################################################
 
+APP=abiword
+BIN="$APP"
+
+utils_pkgs="which ttf-dejavu ttf-liberation"
+
 # Package groups
-audio_pkgs="alsa-lib alsa-plugins libpulse \
-	jack2 alsa-tools alsa-utils pipewire"
+audio_pkgs="alsa-lib lib32-alsa-lib alsa-plugins lib32-alsa-plugins libpulse \
+	lib32-libpulse jack2 lib32-jack2 alsa-tools alsa-utils pipewire lib32-pipewire"
 
-video_pkgs="mesa vulkan-radeon \
-	vulkan-intel \
-	vulkan-icd-loader vulkan-mesa-layers \
-	libva-mesa-driver \
-	libva-intel-driver intel-media-driver \
-	mesa-utils vulkan-tools libva-utils"
+video_pkgs="mesa lib32-mesa vulkan-radeon lib32-vulkan-radeon \
+	vulkan-intel lib32-vulkan-intel \
+	vulkan-icd-loader lib32-vulkan-icd-loader vulkan-mesa-layers \
+	lib32-vulkan-mesa-layers libva-mesa-driver lib32-libva-mesa-driver \
+	libva-intel-driver lib32-libva-intel-driver intel-media-driver \
+	mesa-utils vulkan-tools libva-utils lib32-mesa-utils"
 
-wine_pkgs="libpng gnutls openal \
-	v4l-utils libpulse alsa-plugins \
-	alsa-lib libjpeg-turbo \
-	libxcomposite \
-	libva wget \
-	vulkan-icd-loader sdl2 \
-	vkd3d ffmpeg gst-plugins-good gst-plugins-bad \
-	gst-plugins-ugly gst-plugins-base \
-	gst-libav wget gst-plugin-pipewire"
+wine_pkgs="wine-staging winetricks-git wine-nine wineasio \
+	giflib lib32-giflib libpng lib32-libpng libldap lib32-libldap \
+	gnutls lib32-gnutls mpg123 lib32-mpg123 openal lib32-openal \
+	v4l-utils lib32-v4l-utils libpulse lib32-libpulse alsa-plugins \
+	lib32-alsa-plugins alsa-lib lib32-alsa-lib libjpeg-turbo \
+	lib32-libjpeg-turbo libxcomposite lib32-libxcomposite libxinerama \
+	lib32-libxinerama libxslt lib32-libxslt libva lib32-libva gtk3 \
+	lib32-gtk3 vulkan-icd-loader lib32-vulkan-icd-loader sdl2 lib32-sdl2 \
+	vkd3d lib32-vkd3d libgphoto2 ffmpeg gst-plugins-good gst-plugins-bad \
+	gst-plugins-ugly gst-plugins-base lib32-gst-plugins-good \
+	lib32-gst-plugins-base gst-libav wget gst-plugin-pipewire"
 
-devel_pkgs="base-devel git meson mingw-w64-gcc cmake gtk3"
+devel_pkgs="base-devel git meson mingw-w64-gcc cmake"
 
 # Packages to install
 # You can add packages that you want and remove packages that you don't need
 # Apart from packages from the official Arch repos, you can also specify
 # packages from the Chaotic-AUR repo
-export packagelist="which ttf-dejavu ttf-liberation abiword"
+export packagelist="$APP ${utils_pkgs}"
 
 # If you want to install AUR packages, specify them in this variable
 export aur_packagelist=""
@@ -165,36 +172,6 @@ install_aur_packages () {
 	done
 }
 
-generate_localegen () {
-	cat <<EOF > locale.gen
-ar_EG.UTF-8 UTF-8
-en_US.UTF-8 UTF-8
-en_GB.UTF-8 UTF-8
-en_CA.UTF-8 UTF-8
-en_SG.UTF-8 UTF-8
-es_MX.UTF-8 UTF-8
-zh_CN.UTF-8 UTF-8
-fr_FR.UTF-8 UTF-8
-ru_RU.UTF-8 UTF-8
-ru_UA.UTF-8 UTF-8
-es_ES.UTF-8 UTF-8
-de_DE.UTF-8 UTF-8
-pt_BR.UTF-8 UTF-8
-it_IT.UTF-8 UTF-8
-id_ID.UTF-8 UTF-8
-ja_JP.UTF-8 UTF-8
-bg_BG.UTF-8 UTF-8
-pl_PL.UTF-8 UTF-8
-da_DK.UTF-8 UTF-8
-ko_KR.UTF-8 UTF-8
-tr_TR.UTF-8 UTF-8
-hu_HU.UTF-8 UTF-8
-cs_CZ.UTF-8 UTF-8
-bn_IN UTF-8
-hi_IN UTF-8
-EOF
-}
-
 generate_mirrorlist () {
 	cat <<EOF > mirrorlist
 Server = https://mirror1.sl-chat.ru/archlinux/\$repo/os/\$arch
@@ -260,8 +237,6 @@ rm archlinux-bootstrap-x86_64.tar.zst sha256sums.txt sha256.txt
 
 mount_chroot
 
-#generate_localegen
-
 if command -v reflector 1>/dev/null; then
 	echo "Generating mirrorlist..."
 	reflector --connection-timeout 10 --download-timeout 10 --protocol https --score 10 --sort rate --save mirrorlist
@@ -269,9 +244,6 @@ if command -v reflector 1>/dev/null; then
 else
 	generate_mirrorlist
 fi
-
-#rm "${bootstrap}"/etc/locale.gen
-#mv locale.gen "${bootstrap}"/etc/locale.gen
 
 rm "${bootstrap}"/etc/pacman.d/mirrorlist
 mv mirrorlist "${bootstrap}"/etc/pacman.d/mirrorlist
@@ -358,10 +330,7 @@ if [ -n "${aur_packagelist}" ]; then
 	export -f install_aur_packages
 	CHROOT_AUR=1 HOME=/home/aur run_in_chroot bash -c install_aur_packages
 	mv "${bootstrap}"/home/aur/bad_aur_pkglist.txt "${bootstrap}"/opt
-	#rm -rf "${bootstrap}"/home/aur
 fi
-
-#run_in_chroot locale-gen
 
 # Remove unneeded packages
 run_in_chroot pacman --noconfirm -Rsudd base-devel meson mingw-w64-gcc cmake gcc
@@ -382,11 +351,11 @@ rsync -av "${bootstrap}"/usr/share/virtualbox/nls/* "${bootstrap}"/usr/lib/virtu
 
 # Remove bloatwares
 run_in_chroot rm -Rf /usr/include /usr/share/man
-run_in_chroot bash -c 'find "${bootstrap}"/usr/share/doc/* -not -iname "*abiword*" -a -not -name "." -delete'
-run_in_chroot bash -c 'find "${bootstrap}"/usr/share/locale/*/*/* -not -iname "*abiword*" -a -not -name "." -delete'
+run_in_chroot bash -c 'find "${bootstrap}"/usr/share/doc/* -not -iname "*'"$BIN"'*" -a -not -name "." -delete'
+run_in_chroot bash -c 'find "${bootstrap}"/usr/share/locale/*/*/* -not -iname "*'"$BIN"'*" -a -not -name "." -delete'
 
 # Check if the command we are interested in has been installed
-if ! run_in_chroot which abiword; then echo "Command not found, exiting." && exit 1; fi
+if ! run_in_chroot which "$BIN"; then echo "Command not found, exiting." && exit 1; fi
 
 # Exit chroot
 rm -rf "${bootstrap}"/home/aur
