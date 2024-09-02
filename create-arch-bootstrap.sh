@@ -413,9 +413,6 @@ if ! run_in_chroot which virtualbox; then echo "Command not found, exiting." && 
 
 # Exit chroot
 rm -rf "${bootstrap}"/home/aur
-
-run_in_chroot bash -c 'for d in /usr/lib/dri/*; do echo "$d"; if ! echo "$d" | grep -q "^swrast"; then rm -Rf "$d"; fi; done'
-
 unmount_chroot
 
 # Clear pacman package cache
@@ -433,6 +430,8 @@ chmod 755 "${bootstrap}"/root
 # Enable full font hinting
 rm -f "${bootstrap}"/etc/fonts/conf.d/10-hinting-slight.conf
 ln -s /usr/share/fontconfig/conf.avail/10-hinting-full.conf "${bootstrap}"/etc/fonts/conf.d
+
+for d in "${bootstrap}"/usr/lib/dri/*; do echo "$d"; if ! echo "$d" | grep -q "^swrast"; then sudo rm -Rf "$d"; fi; done
 
 clear
 echo "Done"
