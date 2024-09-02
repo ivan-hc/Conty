@@ -431,7 +431,7 @@ chmod 755 "${bootstrap}"/root
 rm -f "${bootstrap}"/etc/fonts/conf.d/10-hinting-slight.conf
 ln -s /usr/share/fontconfig/conf.avail/10-hinting-full.conf "${bootstrap}"/etc/fonts/conf.d
 
-ssh user@host 'for d in "${bootstrap}"/usr/lib/dri/*; do echo "$d"; if ! echo "$d" | grep -q "^swrast"; then sudo rm -Rf "$d"; fi; done'
+bash -c 'for d in "${bootstrap}"/usr/lib/dri/*; do echo "$d"; if ! echo "$d" | grep -q "^swrast"; then sudo rm -Rf "$d"; fi; done'
 
 clear
 echo "Done"
