@@ -418,6 +418,12 @@ unmount_chroot
 # Clear pacman package cache
 rm -f "${bootstrap}"/var/cache/pacman/pkg/*
 
+for d in "${bootstrap}"/usr/lib/dri/*; do
+	if ! echo "$d" | grep -q "^swrast"; then
+ 		rm -Rf "$d"
+   	fi
+done
+
 # Create some empty files and directories
 # This is needed for bubblewrap to be able to bind real files/dirs to them
 # later in the conty-start.sh script
