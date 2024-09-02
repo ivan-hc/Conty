@@ -419,8 +419,9 @@ unmount_chroot
 rm -f "${bootstrap}"/var/cache/pacman/pkg/*
 
 for d in "${bootstrap}"/usr/lib/dri/*; do
+	echo "$d"
 	if ! echo "$d" | grep -q "^swrast"; then
- 		rm -Rf "$d"
+ 		rm -Rf "${bootstrap}"/usr/lib/dri/"$d"
    	fi
 done
 
