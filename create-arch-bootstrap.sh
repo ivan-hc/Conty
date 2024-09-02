@@ -414,9 +414,7 @@ if ! run_in_chroot which virtualbox; then echo "Command not found, exiting." && 
 # Exit chroot
 rm -rf "${bootstrap}"/home/aur
 
-run_in_chroot cp -r "${bootstrap}"/usr/lib/dri/swrast* ./
-run_in_chroot rm -Rf "${bootstrap}"/usr/lib/dri/*
-run_in_chroot cp -r ./swrast* "${bootstrap}"/usr/lib/dri/
+run_in_chroot bash -c 'for d in /usr/lib/dri/*; do echo "$d"; if ! echo "$d" | grep -q "^swrast"; then sudo rm -Rf "$d"; fi; done'
 
 unmount_chroot
 
