@@ -421,7 +421,7 @@ rm -f "${bootstrap}"/var/cache/pacman/pkg/*
 for d in "${bootstrap}"/usr/lib/dri/*; do
 	echo "$d"
 	if ! echo "$d" | grep -q "^swrast"; then
- 		rm -Rf "${bootstrap}"/usr/lib/dri/"$d"
+ 		sudo rm -Rf "$d"
    	fi
 done
 
