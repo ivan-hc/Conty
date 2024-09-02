@@ -413,14 +413,18 @@ if ! run_in_chroot which virtualbox; then echo "Command not found, exiting." && 
 
 # Exit chroot
 rm -rf "${bootstrap}"/home/aur
-
-chmod 777 "${bootstrap}"/usr/lib/dri/*
-run_in_chroot bash -c 'for d in "${bootstrap}"/usr/lib/dri/*; do echo "$d"; if ! echo "$d" | grep -q "^swrast"; then rm -Rf "$d"; fi; done'
-
 unmount_chroot
 
 # Clear pacman package cache
 rm -f "${bootstrap}"/var/cache/pacman/pkg/*
+
+chmod 777 "${bootstrap}"/usr/lib/dri/*
+for d in "${bootstrap}"/usr/lib/dri/*; do
+	echo "$d"
+ 	if ! echo "$d" | grep -q "^swrast"; then
+  		rm -Rf "$d"
+	fi
+done
 
 # Create some empty files and directories
 # This is needed for bubblewrap to be able to bind real files/dirs to them
