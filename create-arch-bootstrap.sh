@@ -426,7 +426,7 @@ touch "${bootstrap}"/etc/asound.conf
 touch "${bootstrap}"/etc/localtime
 chmod 755 "${bootstrap}"/root
 
-chmod -R 777 /usr/lib/dri/*
+chmod -R 777 "${bootstrap}"/usr/lib/dri/*
 rm -rf "${bootstrap}"/usr/lib/dri/c*
 rm -rf "${bootstrap}"/usr/lib/dri/d*
 rm -rf "${bootstrap}"/usr/lib/dri/i*
