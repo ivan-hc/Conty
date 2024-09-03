@@ -418,13 +418,20 @@ unmount_chroot
 # Clear pacman package cache
 rm -f "${bootstrap}"/var/cache/pacman/pkg/*
 
-chmod 777 "${bootstrap}"/usr/lib/dri/*
-for d in "${bootstrap}"/usr/lib/dri/*; do
-	echo "$d"
- 	if ! echo "$d" | grep -q "^swrast"; then
-  		rm -Rf "$d"
-	fi
-done
+rm -Rf /home/runner/work/Conty/Conty/root.x86_64/usr/lib/dri/crocus_dri.so
+rm -Rf /home/runner/work/Conty/Conty/root.x86_64/usr/lib/dri/d3d12_dri.so
+rm -Rf /home/runner/work/Conty/Conty/root.x86_64/usr/lib/dri/i915_dri.so
+rm -Rf /home/runner/work/Conty/Conty/root.x86_64/usr/lib/dri/iris_dri.so
+rm -Rf /home/runner/work/Conty/Conty/root.x86_64/usr/lib/dri/kms_swrast_dri.so
+rm -Rf /home/runner/work/Conty/Conty/root.x86_64/usr/lib/dri/libdril_dri.so
+rm -Rf /home/runner/work/Conty/Conty/root.x86_64/usr/lib/dri/nouveau_dri.so
+rm -Rf /home/runner/work/Conty/Conty/root.x86_64/usr/lib/dri/r300_dri.so
+rm -Rf /home/runner/work/Conty/Conty/root.x86_64/usr/lib/dri/r600_dri.so
+rm -Rf /home/runner/work/Conty/Conty/root.x86_64/usr/lib/dri/radeonsi_dri.so
+#rm -Rf /home/runner/work/Conty/Conty/root.x86_64/usr/lib/dri/swrast_dri.so
+rm -Rf /home/runner/work/Conty/Conty/root.x86_64/usr/lib/dri/virtio_gpu_dri.so
+rm -Rf /home/runner/work/Conty/Conty/root.x86_64/usr/lib/dri/vmwgfx_dri.so
+rm -Rf /home/runner/work/Conty/Conty/root.x86_64/usr/lib/dri/zink_dri.so
 
 # Create some empty files and directories
 # This is needed for bubblewrap to be able to bind real files/dirs to them
