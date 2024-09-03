@@ -408,6 +408,21 @@ run_in_chroot rm -Rf /usr/include /usr/share/man
 run_in_chroot bash -c 'find "${bootstrap}"/usr/share/doc/* -not -iname "*virtualbox*" -a -not -name "." -delete'
 run_in_chroot bash -c 'find "${bootstrap}"/usr/share/locale/*/*/* -not -iname "*virtualbox*" -a -not -name "." -delete'
 
+run_in_chroot rm -Rf /usr/lib/dri/crocus_dri.so
+run_in_chroot rm -Rf /usr/lib/dri/d3d12_dri.so
+run_in_chroot rm -Rf /usr/lib/dri/i915_dri.so
+run_in_chroot rm -Rf /usr/lib/dri/iris_dri.so
+run_in_chroot rm -Rf /usr/lib/dri/kms_swrast_dri.so
+run_in_chroot rm -Rf /usr/lib/dri/libdril_dri.so
+run_in_chroot rm -Rf /usr/lib/dri/nouveau_dri.so
+run_in_chroot rm -Rf /usr/lib/dri/r300_dri.so
+run_in_chroot rm -Rf /usr/lib/dri/r600_dri.so
+run_in_chroot rm -Rf /usr/lib/dri/radeonsi_dri.so
+#run_in_chroot rm -Rf /usr/lib/dri/swrast_dri.so
+run_in_chroot rm -Rf /usr/lib/dri/virtio_gpu_dri.so
+run_in_chroot rm -Rf /usr/lib/dri/vmwgfx_dri.so
+run_in_chroot rm -Rf /usr/lib/dri/zink_dri.so
+
 # Check if the command we are interested in has been installed
 if ! run_in_chroot which virtualbox; then echo "Command not found, exiting." && exit 1; fi
 
@@ -417,22 +432,6 @@ unmount_chroot
 
 # Clear pacman package cache
 rm -f "${bootstrap}"/var/cache/pacman/pkg/*
-
-rm -Rf /home/runner/work/Conty/Conty/root.x86_64/usr/lib/dri/crocus_dri.so
-rm -Rf /home/runner/work/Conty/Conty/root.x86_64/usr/lib/dri/d3d12_dri.so
-rm -Rf /home/runner/work/Conty/Conty/root.x86_64/usr/lib/dri/i915_dri.so
-rm -Rf /home/runner/work/Conty/Conty/root.x86_64/usr/lib/dri/iris_dri.so
-rm -Rf /home/runner/work/Conty/Conty/root.x86_64/usr/lib/dri/kms_swrast_dri.so
-rm -Rf /home/runner/work/Conty/Conty/root.x86_64/usr/lib/dri/libdril_dri.so
-rm -Rf /home/runner/work/Conty/Conty/root.x86_64/usr/lib/dri/nouveau_dri.so
-rm -Rf /home/runner/work/Conty/Conty/root.x86_64/usr/lib/dri/r300_dri.so
-rm -Rf /home/runner/work/Conty/Conty/root.x86_64/usr/lib/dri/r600_dri.so
-rm -Rf /home/runner/work/Conty/Conty/root.x86_64/usr/lib/dri/radeonsi_dri.so
-#rm -Rf /home/runner/work/Conty/Conty/root.x86_64/usr/lib/dri/swrast_dri.so
-rm -Rf /home/runner/work/Conty/Conty/root.x86_64/usr/lib/dri/virtio_gpu_dri.so
-rm -Rf /home/runner/work/Conty/Conty/root.x86_64/usr/lib/dri/vmwgfx_dri.so
-rm -Rf /home/runner/work/Conty/Conty/root.x86_64/usr/lib/dri/zink_dri.so
-
 # Create some empty files and directories
 # This is needed for bubblewrap to be able to bind real files/dirs to them
 # later in the conty-start.sh script
