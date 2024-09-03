@@ -408,18 +408,6 @@ run_in_chroot rm -Rf /usr/include /usr/share/man
 run_in_chroot bash -c 'find "${bootstrap}"/usr/share/doc/* -not -iname "*virtualbox*" -a -not -name "." -delete'
 run_in_chroot bash -c 'find "${bootstrap}"/usr/share/locale/*/*/* -not -iname "*virtualbox*" -a -not -name "." -delete'
 
-chmod 777 /usr/lib/dri/*
-run_in_chroot rm -Rf /usr/lib/dri/c*
-run_in_chroot rm -Rf /usr/lib/dri/d*
-run_in_chroot rm -Rf /usr/lib/dri/i*
-run_in_chroot rm -Rf /usr/lib/dri/kms_swrast_dri.so
-run_in_chroot rm -Rf /usr/lib/dri/l*
-run_in_chroot rm -Rf /usr/lib/dri/nouveau_dri.so
-run_in_chroot rm -Rf /lib/dri/r*
-#run_in_chroot rm -Rf /home/runner/work/Conty/Conty/root.x86_64/usr/lib/dri/swrast_dri.so
-run_in_chroot rm -Rf /usr/lib/dri/v*
-run_in_chroot rm -Rf /usr/lib/dri/zink_dri.so
-
 # Check if the command we are interested in has been installed
 if ! run_in_chroot which virtualbox; then echo "Command not found, exiting." && exit 1; fi
 
@@ -437,6 +425,18 @@ mkdir -p "${bootstrap}"/usr/share/steam/compatibilitytools.d
 touch "${bootstrap}"/etc/asound.conf
 touch "${bootstrap}"/etc/localtime
 chmod 755 "${bootstrap}"/root
+
+chmod -R 777 /usr/lib/dri/*
+rm -rf "${bootstrap}"/usr/lib/dri/c*
+rm -rf "${bootstrap}"/usr/lib/dri/d*
+rm -rf "${bootstrap}"/usr/lib/dri/i*
+rm -rf "${bootstrap}"/usr/lib/dri/kms_swrast_dri.so
+rm -rf "${bootstrap}"/usr/lib/dri/l*
+rm -rf "${bootstrap}"/usr/lib/dri/nouveau_dri.so
+rm -rf "${bootstrap}"/usr/lib/dri/r*
+#rm -rf "${bootstrap}"/usr/lib/dri/swrast_dri.so
+rm -rf "${bootstrap}"/usr/lib/dri/v*
+rm -rf "${bootstrap}"/usr/lib/dri/zink_dri.so
 
 # Enable full font hinting
 rm -f "${bootstrap}"/etc/fonts/conf.d/10-hinting-slight.conf
