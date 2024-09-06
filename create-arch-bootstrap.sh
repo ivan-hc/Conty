@@ -392,7 +392,6 @@ rm -rf "${bootstrap}"/usr/lib/*.a
 rm -rf "${bootstrap}"/usr/lib/libgo.so*
 rm -rf "${bootstrap}"/usr/lib/libgphobos.so*
 rm -rf "${bootstrap}"/usr/lib/libjavascript*
-rm -rf "${bootstrap}"/usr/lib/libwebkit*
 #rm -rf "${bootstrap}"/usr/lib/libLLVM*
 rm -rf "${bootstrap}"/usr/lib/perl*
 rm -rf "${bootstrap}"/usr/share/ibus/dicts/emoji*
