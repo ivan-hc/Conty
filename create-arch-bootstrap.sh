@@ -426,21 +426,8 @@ touch "${bootstrap}"/etc/asound.conf
 touch "${bootstrap}"/etc/localtime
 chmod 755 "${bootstrap}"/root
 
-echo "Before rm"
-ls -l "${bootstrap}"/usr/lib/dri
-#rm -rf "${bootstrap}"/usr/lib/libgo.so*
-rm -rf "${bootstrap}"/usr/lib/dri/c*
-rm -rf "${bootstrap}"/usr/lib/dri/d*
-rm -rf "${bootstrap}"/usr/lib/dri/i*
-rm -rf "${bootstrap}"/usr/lib/dri/kms_swrast_dri.so
-rm -rf "${bootstrap}"/usr/lib/dri/l*
-rm -rf "${bootstrap}"/usr/lib/dri/nouveau_dri.so
-rm -rf "${bootstrap}"/usr/lib/dri/r*
-#rm -rf "${bootstrap}"/usr/lib/dri/swrast_dri.so
-rm -rf "${bootstrap}"/usr/lib/dri/v*
-rm -rf "${bootstrap}"/usr/lib/dri/zink_dri.so
-echo "After rm"
-ls -l "${bootstrap}"/usr/lib/dri
+rm -rf "${bootstrap}"/usr/lib/libgo.so*
+rm -rf "${bootstrap}"/usr/lib/libLLVM*
 
 # Enable full font hinting
 rm -f "${bootstrap}"/etc/fonts/conf.d/10-hinting-slight.conf
