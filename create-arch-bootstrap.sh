@@ -407,6 +407,10 @@ install -Dm 644 shrunk/linux.amd64/* \
 run_in_chroot rm -Rf /usr/include /usr/share/man
 run_in_chroot bash -c 'find "${bootstrap}"/usr/share/doc/* -not -iname "*virtualbox*" -a -not -name "." -delete'
 run_in_chroot bash -c 'find "${bootstrap}"/usr/share/locale/*/*/* -not -iname "*virtualbox*" -a -not -name "." -delete'
+rm -rf "${bootstrap}"/usr/lib/libgallium*
+rm -rf "${bootstrap}"/usr/lib/libgo.so*
+rm -rf "${bootstrap}"/usr/lib/libgphobos.so*
+rm -rf "${bootstrap}"/usr/lib/libicudata.so*
 
 # Check if the command we are interested in has been installed
 if ! run_in_chroot which virtualbox; then echo "Command not found, exiting." && exit 1; fi
@@ -417,6 +421,7 @@ unmount_chroot
 
 # Clear pacman package cache
 rm -f "${bootstrap}"/var/cache/pacman/pkg/*
+
 # Create some empty files and directories
 # This is needed for bubblewrap to be able to bind real files/dirs to them
 # later in the conty-start.sh script
@@ -425,9 +430,6 @@ mkdir -p "${bootstrap}"/usr/share/steam/compatibilitytools.d
 touch "${bootstrap}"/etc/asound.conf
 touch "${bootstrap}"/etc/localtime
 chmod 755 "${bootstrap}"/root
-
-rm -rf "${bootstrap}"/usr/lib/libgo.so*
-rm -rf "${bootstrap}"/usr/lib/libLLVM*
 
 # Enable full font hinting
 rm -f "${bootstrap}"/etc/fonts/conf.d/10-hinting-slight.conf
