@@ -6,39 +6,51 @@
 ########################################################################
 
 # Package groups
-audio_pkgs="alsa-lib alsa-plugins libpulse \
-	jack2 alsa-tools alsa-utils pipewire"
+audio_pkgs="alsa-lib lib32-alsa-lib alsa-plugins lib32-alsa-plugins libpulse \
+	lib32-libpulse jack2 lib32-jack2 alsa-tools alsa-utils pipewire \
+	lib32-pipewire"
 
-video_pkgs="mesa vulkan-radeon \
-	vulkan-intel \
-	vulkan-icd-loader vulkan-mesa-layers \
-	libva-mesa-driver \
-	libva-intel-driver intel-media-driver \
-	mesa-utils vulkan-tools libva-utils"
+video_pkgs="mesa lib32-mesa vulkan-radeon lib32-vulkan-radeon \
+	vulkan-intel lib32-vulkan-intel \
+	vulkan-icd-loader lib32-vulkan-icd-loader vulkan-mesa-layers \
+	lib32-vulkan-mesa-layers libva-mesa-driver lib32-libva-mesa-driver \
+	libva-intel-driver lib32-libva-intel-driver intel-media-driver \
+	mesa-utils vulkan-tools libva-utils lib32-mesa-utils"
 
-wine_pkgs="libpng gnutls openal \
-	v4l-utils libpulse alsa-plugins \
-	alsa-lib libjpeg-turbo \
-	libxcomposite \
-	libva wget \
-	vulkan-icd-loader sdl2 \
-	vkd3d ffmpeg gst-plugins-good gst-plugins-bad \
-	gst-plugins-ugly gst-plugins-base \
-	gst-libav wget gst-plugin-pipewire"
+wine_pkgs="wine-staging winetricks-git wine-nine wineasio \
+	giflib lib32-giflib libpng lib32-libpng libldap lib32-libldap \
+	gnutls lib32-gnutls mpg123 lib32-mpg123 openal lib32-openal \
+	v4l-utils lib32-v4l-utils libpulse lib32-libpulse alsa-plugins \
+	lib32-alsa-plugins alsa-lib lib32-alsa-lib libjpeg-turbo \
+	lib32-libjpeg-turbo libxcomposite lib32-libxcomposite libxinerama \
+	lib32-libxinerama libxslt lib32-libxslt libva lib32-libva gtk3 \
+	lib32-gtk3 vulkan-icd-loader lib32-vulkan-icd-loader sdl2 lib32-sdl2 \
+	vkd3d lib32-vkd3d libgphoto2 ffmpeg gst-plugins-good gst-plugins-bad \
+	gst-plugins-ugly gst-plugins-base lib32-gst-plugins-good \
+	lib32-gst-plugins-base gst-libav wget gst-plugin-pipewire"
 
-devel_pkgs="base-devel git meson mingw-w64-gcc cmake gtk3"
+wine32_pkgs="lib32-giflib lib32-libpng lib32-libldap lib32-gnutls mpg123 \
+	lib32-mpg123 lib32-openal lib32-v4l-utils lib32-libpulse \
+	lib32-alsa-plugins lib32-alsa-lib \
+	lib32-libjpeg-turbo lib32-libxcomposite \
+	lib32-libxinerama lib32-libxslt lib32-libva gtk3 \
+	lib32-gtk3 lib32-sdl2 lib32-vkd3d lib32-gst-plugins-good \
+	lib32-gst-plugins-base"
+
+devel_pkgs="base-devel git meson mingw-w64-gcc cmake"
 
 # Packages to install
 # You can add packages that you want and remove packages that you don't need
 # Apart from packages from the official Arch repos, you can also specify
 # packages from the Chaotic-AUR repo
-export packagelist="${audio_pkgs} libpng gnutls openal \
-	which ttf-dejavu ttf-liberation xorg-xwayland wayland \
-	xorg-server xorg-apps curl virtualbox-kvm v4l-utils \
- 	kvantum kvantum-qt5 qt5ct qt6ct libva sdl2 vulkan-icd-loader"
+export packagelist="${audio_pkgs} ${wine32_pkgs} ${devel_pkgs} \
+	ttf-dejavu ttf-liberation xorg-xwayland gamemode lib32-gamemode wayland \
+	lib32-wayland xorg-server xorg-apps which ibus libpng v4l-utils libxslt \
+ 	vulkan-icd-loader lib32-vulkan-icd-loader gnutls openal libjpeg-turbo \
+	libva sdl2 xterm"
 
 # If you want to install AUR packages, specify them in this variable
-export aur_packagelist=""
+export aur_packagelist="bottles"
 
 # ALHP is a repository containing packages from the official Arch Linux
 # repos recompiled with -O3, LTO and optimizations for modern CPUs for
@@ -367,7 +379,7 @@ fi
 #run_in_chroot locale-gen
 
 # Remove unneeded packages
-run_in_chroot pacman --noconfirm -Rsudd base-devel meson mingw-w64-gcc cmake gcc
+run_in_chroot pacman --noconfirm -Rsu base-devel meson mingw-w64-gcc cmake gcc
 run_in_chroot pacman --noconfirm -Rdd wine-staging
 run_in_chroot pacman -Qdtq | run_in_chroot pacman --noconfirm -Rsn -
 run_in_chroot pacman --noconfirm -Scc
@@ -379,42 +391,18 @@ run_in_chroot pacman -Q > "${bootstrap}"/pkglist.x86_64.txt
 run_in_chroot rm -f "${bootstrap}"/etc/locale.conf
 run_in_chroot sed -i 's/LANG=${LANG:-C}/LANG=$LANG/g' /etc/profile.d/locale.sh
 
-# Fix locale
-mkdir -p "${bootstrap}"/usr/lib/virtualbox/nls
-rsync -av "${bootstrap}"/usr/share/virtualbox/nls/* "${bootstrap}"/usr/lib/virtualbox/nls/
-
-# Add guest additions
-vboxver=$(curl -Ls https://gitlab.com/chaotic-aur/pkgbuilds/-/raw/main/virtualbox-kvm/PKGBUILD | grep vboxver | head -1 | tr "'" '\n' | grep "^[0-9]")
-wget https://download.virtualbox.org/virtualbox/"${vboxver}"/VBoxGuestAdditions_"${vboxver}".iso -O ./VBoxGuestAdditions.iso || exit 1
-mkdir -p "${bootstrap}"/usr/lib/virtualbox/additions
-mv VBoxGuestAdditions.iso "${bootstrap}"/usr/lib/virtualbox/additions/ || exit 1
-
-# Add extension pack
-wget https://download.virtualbox.org/virtualbox/"${vboxver}"/Oracle_VM_VirtualBox_Extension_Pack-"${vboxver}".vbox-extpack -O ./Extension_Pack.tar
-mkdir -p shrunk
-tar xfC ./Extension_Pack.tar shrunk
-rm -r shrunk/{darwin*,solaris*,win*}
-tar -c --gzip --file shrunk.vbox-extpack -C shrunk .
-install -Dm 644 shrunk.vbox-extpack \
-	"${bootstrap}"/usr/share/virtualbox/extensions/Oracle_VM_VirtualBox_Extension_Pack-"${vboxver}".vbox-extpack
-install -Dm 644 shrunk/ExtPack-license.txt \
-	"${bootstrap}"/usr/share/licenses/virtualbox-ext-oracle/PUEL
-mkdir -p "${bootstrap}"/usr/lib/virtualbox/ExtensionPacks/Oracle_VM_VirtualBox_Extension_Pack/linux.amd64
-install -Dm 644 shrunk/linux.amd64/* \
-	"${bootstrap}"/usr/lib/virtualbox/ExtensionPacks/Oracle_VM_VirtualBox_Extension_Pack/linux.amd64/
+# Try to fix GTK/GDK error messages
+cp "${bootstrap}"/usr/lib/gtk-3.0/3.0.0/immodules/im-ibus.so "${bootstrap}"/usr/lib/
+cp "${bootstrap}"/usr/lib/gdk-pixbuf-2.0/2.10.0/loaders/libpixbufloader-* "${bootstrap}"/usr/lib/
 
 # Remove bloatwares
-run_in_chroot rm -Rf /usr/include /usr/share/man
-run_in_chroot bash -c 'find "${bootstrap}"/usr/share/doc/* -not -iname "*virtualbox*" -a -not -name "." -delete'
-run_in_chroot bash -c 'find "${bootstrap}"/usr/share/locale/*/*/* -not -iname "*virtualbox*" -a -not -name "." -delete'
-rm -rf "${bootstrap}"/usr/lib/*.a
-#rm -rf "${bootstrap}"/usr/lib/libgallium*
-rm -rf "${bootstrap}"/usr/lib/libgo.so*
-rm -rf "${bootstrap}"/usr/lib/libgphobos.so*
-#rm -rf "${bootstrap}"/usr/lib/libLLVM*
+run_in_chroot pacman --noconfirm -Rsndd gcc
+run_in_chroot rm -Rf /usr/include /usr/share/man /usr/share/gtk-doc /usr/lib/gcc /usr/bin/gcc*
+run_in_chroot bash -c 'find "${bootstrap}"/usr/share/doc/* -not -iname "*bottles*" -a -not -name "." -delete'
+run_in_chroot bash -c 'find "${bootstrap}"/usr/share/locale/*/*/* -not -iname "*bottles*" -a -not -name "." -delete'
 
 # Check if the command we are interested in has been installed
-if ! run_in_chroot which virtualbox; then echo "Command not found, exiting." && exit 1; fi
+if ! run_in_chroot which bottles; then echo "Command not found, exiting." && exit 1; fi
 
 # Exit chroot
 rm -rf "${bootstrap}"/home/aur
