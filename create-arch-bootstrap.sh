@@ -407,7 +407,6 @@ install -Dm 644 shrunk/linux.amd64/* \
 run_in_chroot rm -Rf /usr/include /usr/share/man
 run_in_chroot bash -c 'find "${bootstrap}"/usr/share/doc/* -not -iname "*virtualbox*" -a -not -name "." -delete'
 run_in_chroot bash -c 'find "${bootstrap}"/usr/share/locale/*/*/* -not -iname "*virtualbox*" -a -not -name "." -delete'
-run_in_chroot rm -Rf "${bootstrap}"/usr/lib/libgo.so*
 
 # Check if the command we are interested in has been installed
 if ! run_in_chroot which virtualbox; then echo "Command not found, exiting." && exit 1; fi
@@ -427,7 +426,9 @@ touch "${bootstrap}"/etc/asound.conf
 touch "${bootstrap}"/etc/localtime
 chmod 755 "${bootstrap}"/root
 
-chmod -R 777 "${bootstrap}"/usr/lib/dri/*
+echo "Before rm"
+ls -l "${bootstrap}"/usr/lib/dri
+#rm -rf "${bootstrap}"/usr/lib/libgo.so*
 rm -rf "${bootstrap}"/usr/lib/dri/c*
 rm -rf "${bootstrap}"/usr/lib/dri/d*
 rm -rf "${bootstrap}"/usr/lib/dri/i*
@@ -438,6 +439,8 @@ rm -rf "${bootstrap}"/usr/lib/dri/r*
 #rm -rf "${bootstrap}"/usr/lib/dri/swrast_dri.so
 rm -rf "${bootstrap}"/usr/lib/dri/v*
 rm -rf "${bootstrap}"/usr/lib/dri/zink_dri.so
+echo "After rm"
+ls -l "${bootstrap}"/usr/lib/dri
 
 # Enable full font hinting
 rm -f "${bootstrap}"/etc/fonts/conf.d/10-hinting-slight.conf
