@@ -410,7 +410,6 @@ run_in_chroot bash -c 'find "${bootstrap}"/usr/share/locale/*/*/* -not -iname "*
 rm -rf "${bootstrap}"/usr/lib/libgallium*
 rm -rf "${bootstrap}"/usr/lib/libgo.so*
 rm -rf "${bootstrap}"/usr/lib/libgphobos.so*
-rm -rf "${bootstrap}"/usr/lib/libicudata.so*
 
 # Check if the command we are interested in has been installed
 if ! run_in_chroot which virtualbox; then echo "Command not found, exiting." && exit 1; fi
