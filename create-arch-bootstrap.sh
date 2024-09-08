@@ -369,6 +369,9 @@ fi
 # Remove unneeded packages
 run_in_chroot pacman --noconfirm -Rsudd base-devel meson mingw-w64-gcc cmake gcc
 run_in_chroot pacman --noconfirm -Rdd wine-staging
+run_in_chroot pacman --noconfirm -Rsndd gcc yay pacman systemd
+run_in_chroot pacman -Qdtq | run_in_chroot pacman --noconfirm -Rsn -
+run_in_chroot pacman --noconfirm -Rsndd pacman
 run_in_chroot pacman -Qdtq | run_in_chroot pacman --noconfirm -Rsn -
 run_in_chroot pacman --noconfirm -Scc
 
