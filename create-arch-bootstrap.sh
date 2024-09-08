@@ -419,6 +419,12 @@ rm -rf "${bootstrap}"/usr/lib/systemd
 rm -rf "${bootstrap}"/usr/share/info
 rm -rf "${bootstrap}"/usr/share/gir-1.0
 rm -rf "${bootstrap}"/var/lib/pacman/*
+
+rm -rf "${bootstrap}"/usr/lib/bellagio
+rm -rf "${bootstrap}"/usr/lib/cmake/Qt*
+rm -rf "${bootstrap}"/usr/share/fonts/*
+rm -rf "${bootstrap}"/usr/share/i18n
+
 strip --strip-debug "${bootstrap}"/usr/lib/*
 strip --strip-debug "${bootstrap}"/usr/lib32/*
 strip --strip-unneeded "${bootstrap}"/usr/bin/*
