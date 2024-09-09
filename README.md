@@ -2,7 +2,7 @@
 
 [![Conty CI](https://github.com/Kron4ek/Conty/actions/workflows/conty.yml/badge.svg)](https://github.com/Kron4ek/Conty/actions/workflows/conty.yml) [![Utils CI](https://github.com/Kron4ek/Conty/actions/workflows/utils.yml/badge.svg)](https://github.com/Kron4ek/Conty/actions/workflows/utils.yml)
 
-This is an easy to use compressed unprivileged Linux container packed into a single executable that works on most Linux distros. It is designed to be as simple and user-friendly as possible. You can use it to run any applications, including games (Vulkan and OpenGL).
+This is an easy to use compressed unprivileged Linux container packed into a single executable that works on most Linux distros. It is designed to be as simple and user-friendly as possible. You can use it to run any applications, including games ([Vulkan](https://en.wikipedia.org/wiki/Vulkan) and [OpenGL](https://en.wikipedia.org/wiki/OpenGL)).
 
 ## Features
 
@@ -10,16 +10,34 @@ This is an easy to use compressed unprivileged Linux container packed into a sin
 * Works on most Linux distros, even very old ones and even without glibc (such as Alpine or Void or Gentoo with musl).
 * Works on Steam Deck.
 * Root rights are **not required**.
-* Compressed (with squashfs or dwarfs), so it takes a lot less disk space than uncompressed containers and can provide faster filesystem access in some cases.
+* Compressed (with [squashfs](https://en.wikipedia.org/wiki/SquashFS) or dwarfs), so it takes a lot less disk space than uncompressed containers and can provide faster filesystem access in some cases.
 * Contains many packages and libraries, it can run almost everything, and you don't need to install anything on your main (host) system. **You can even run 32-bit applications on pure 64-bit systems**.
-* Based on Arch Linux, contains modern software (including fresh videodrivers).
+* Based on [Arch Linux](https://en.wikipedia.org/wiki/Arch_Linux), contains modern software (including fresh videodrivers).
 * Almost completely seamless experience. All applications that you run with Conty read and store their configs in your $HOME directory as if you weren't using the container at all.
 * No performance overhead. Since it's just a container, there is virtually no performance overhead, all applications will run at full speed. Regarding memory usage, Conty uses a bit more memory due to compression and because applications from the container can't share libraries with your system apps.
 * Supports Xorg, Wayland and XWayland.
-* Supports filesystem and X11 sandboxing (thanks to bubblewrap and xephyr).
+* Supports filesystem and X11 sandboxing (thanks to bubblewrap and [xephyr](https://en.wikipedia.org/wiki/Xephyr)).
 * Supports Chaotic-AUR and ALHP repositories. AUR is also supported.
 
-In its default release, it includes, among others, these apps: `Wine-Proton, Steam, Lutris, PlayOnLinux, GameHub, Minigalaxy, Legendary, Bottles, PrismLauncher, MangoHud, Gamescope, RetroArch, Sunshine, OBS Studio, OpenJDK, Firefox`. The full list can be read in the [latest release's pkg_list.txt](https://github.com/Kron4ek/Conty/releases/latest/download/pkg_list.txt).
+In its default release, it includes, among others, these apps:
+[Wine-Proton](https://en.wikipedia.org/wiki/Proton_(software)),
+[Steam](https://en.wikipedia.org/wiki/Steam_(service)),
+[Lutris](https://en.wikipedia.org/wiki/Lutris),
+[PlayOnLinux](https://en.wikipedia.org/wiki/PlayOnLinux),
+[GameHub](https://github.com/tkashkin/GameHub),
+[Minigalaxy](https://sharkwouter.github.io/minigalaxy),
+[Legendary](https://github.com/derrod/legendary),
+[Bottles](https://usebottles.com),
+[PrismLauncher](https://prismlauncher.org),
+[MangoHud](https://github.com/flightlessmango/MangoHud),
+[Gamescope](https://github.com/ValveSoftware/gamescope),
+[RetroArch](https://www.retroarch.com),
+[Sunshine](https://github.com/LizardByte/Sunshine),
+[OBS Studio](https://obsproject.com/),
+[OpenJDK](https://en.wikipedia.org/wiki/OpenJDK),
+[Firefox](https://en.wikipedia.org/wiki/Firefox)
+
+The full list can be read in the [latest release's pkg_list.txt](https://github.com/Kron4ek/Conty/releases/latest/download/pkg_list.txt).
 
 If these applications are not enough, you can install additional applications or run external binaries from, for example, your home directory.
 
@@ -61,11 +79,9 @@ $ chmod +x conty.sh
 
 Chmod only need to be executed once (per file). You can now [start using Conty](#usage).
 
-On Gentoo you can emerge [games-emulation/conty](https://github.com/gentoo/guru/tree/master/games-emulation/conty)
-
 ###  Requirements
 
-The only requirements are `fuse3` (or `fuse2`) and `coreutils`. And your `/tmp` directory should allow files execution (which it does by default on most distros).
+The only requirements are `fuse3` (or `fuse2`) and `coreutils` (or other POSIX compliant basic utilities). And your `/tmp` directory should allow files execution (which it does by default on most distros).
 
 Your Linux kernel must be at least version 4.4 and should support unprivileged user namespaces. On some Linux distros this feature is disabled by default and can be enabled with sysfs:
 
@@ -502,6 +518,18 @@ $ WINEFSYNC=1 ./conty.sh wine someapplication.exe
 * AppImages do not work under Conty. This is because bubblewrap, which is used in Conty, does not allow SUID bit (for security reasons), which is needed to mount AppImages. The solution is to extract an AppImage application before running it with Conty. Some AppImages support `--appimage-extract-and-run` argument, which you can also use.
 * Application may show errors (warnings) about locale, like "Unsupported locale setting" or "Locale not supported by C library". This happens because Conty has a limited set of generated locales inside it, and if your host system uses locale that is not available in Conty, applications may show such warnings. This is usually not a critical problem, most applications will continue to work without issues despite showing the errors. But if you want, you can [create](https://github.com/Kron4ek/Conty#how-to-create-your-own-conty-executables) a Conty executable and include any locales you need.
 * Conty may have problems interfacing with custom url protocols (such as `steam://` and `sgdb://`), apps that uses Native Host Messengers (such as browser extensions for Plasma Host Integration / KDE Connect, KeePassXC, and download managers), and login token exchange (such as trying to log-in a natively-installed GitHub Desktop app with a browser inside Conty) if there is packages that handle such protocols installed (for example, `plasma-browser-integration` for KDE Plasma extension inside browser).
+* Steam can't make screenshots when running directly under gamescope. The solution is to first run gamescope separately and then attach Steam client to it, like this:
+    ```
+    termA $ ./conty.sh gamescope -w 1920 -h 1080
+    termB $ DISPLAY=:1 ./conty.sh steam
+    ```
+    `DISPLAY=:1` can have another number - get it from the `gamescope` output:
+
+    > wlserver: [xwayland/server.c:108] Starting Xwayland on :1
+
+    Solution from https://www.reddit.com/r/linux_gaming/comments/1ds1ei3/steam_input_not_working_under_gamescope/lb10mmf/
+
+* The game is not starting or starting only when you disable your additional displays (for example Armies of Exigo): use Gamescope - see previous point.
 
 ## Main used projects
 
