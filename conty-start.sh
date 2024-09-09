@@ -22,7 +22,7 @@ if (( EUID == 0 )) && [ -z "$ALLOW_ROOT" ]; then
 fi
 
 # Conty version
-script_version="1.26.1"
+script_version="1.26.2"
 
 # Important variables to manually adjust after modification!
 # Needed to avoid problems with mounting due to an incorrect offset.
@@ -30,10 +30,10 @@ script_version="1.26.1"
 # If you build Conty without some of the components, you can set their
 # size to 0
 init_size=50000
-bash_size=1490760
-script_size=37478
-busybox_size=1161112
-utils_size=4327795
+bash_size=1752808
+script_size=38502
+busybox_size=1181592
+utils_size=4392469
 
 # Full path to the script
 if [ -n "${BASH_SOURCE[0]}" ]; then
@@ -48,8 +48,18 @@ fi
 script_name="$(basename "${script_literal}")"
 script="$(readlink -f "${script_literal}")"
 
+# Check if head supports -c argument
+
+unset HEAD_C_SUPPORTED
+head -c 0 /dev/null &>/dev/null && HEAD_C_SUPPORTED=1
+
 # MD5 of the first 4 MB and the last 1 MB of the script
-script_md5="$(head -c 4000000 "${script}" | md5sum | head -c 7)"_"$(tail -c 1000000 "${script}" | md5sum | head -c 7)"
+if [ "${HEAD_C_SUPPORTED}" = 1 ]; then
+	script_md5="$(head -c 4000000 "${script}" | md5sum | head -c 7)"_"$(tail -c 1000000 "${script}" | md5sum | head -c 7)"
+else
+	script_md5="$(dd if="${script}" bs=4000000 count=1 2>/dev/null | md5sum | cut -c1-7)"_"$(dd if="${script}" bs=1000000 skip=100 count=1 2>/dev/null | md5sum | cut -c1-7)"
+fi
+
 script_id="$$"
 
 # Working directory where the utils will be extracted
@@ -71,8 +81,10 @@ if [ "${USE_SYS_UTILS}" != 1 ] && [ "${busybox_size}" -gt 0 ]; then
 
 	if [ ! -f "${busybox_bin_dir}"/echo ]; then
 		mkdir -p "${busybox_bin_dir}"
-		tail -c +$((init_size+bash_size+script_size+1)) "${script}" | head -c "${busybox_size}" > "${busybox_path}"
-
+		if [ "${HEAD_C_SUPPORTED}" = 1 ]; then
+			tail -c +$((init_size+bash_size+script_size+1)) "${script}" | head -c "${busybox_size}" > "${busybox_path}"
+		else
+			dd if="${script}" of="${busybox_path}" bs=1 skip=$((init_size+bash_size+script_size)) count="${busybox_size}" 2>/dev/null
 		chmod +x "${busybox_path}" 2>/dev/null
 		"${busybox_path}" --install -s "${busybox_bin_dir}" &>/dev/null
 	fi
@@ -432,7 +444,7 @@ update_conty () {
 	echo "keyserver hkps://keyserver.ubuntu.com" >> /etc/pacman.d/gnupg/gpg.conf
 	fakeroot -- pacman-key --populate archlinux
 	fakeroot -- pacman-key --populate chaotic
-	fakeroot -- pacman --noconfirm --overwrite "*" -Su 2>/dev/null
+	fakeroot -- pacman --noconfirm --overwrite "*" --ignore fakeroot -Su 2>/dev/null
 	fakeroot -- pacman --noconfirm -Runs ${pkgsremove} 2>/dev/null
 	fakeroot -- pacman --noconfirm -S ${pkgsinstall} 2>/dev/null
 	ldconfig -C /etc/ld.so.cache
@@ -1044,6 +1056,7 @@ if [ "$(ls "${mount_point}" 2>/dev/null)" ] || launch_wrapper "${mount_command[@
 			    --bind "${overlayfs_dir}"/gnupg /etc/pacman.d/gnupg \
 				--bind "${overlayfs_dir}"/merged/var /var \
 				--bind-try /var/cache/pacman/pkg /var/cache/pacman/pkg_host \
+				--tmpfs /run \
 				bash -c update_conty
 
 			if [ "${dwarfs_image}" = 1 ]; then
