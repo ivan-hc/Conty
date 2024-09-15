@@ -34,7 +34,12 @@ devel_pkgs="base-devel git meson mingw-w64-gcc cmake gtk3"
 # packages from the Chaotic-AUR repo
 export packagelist="${audio_pkgs} handbrake \
 	which ttf-dejavu ttf-liberation xorg-xwayland wayland \
-	libcups gst-plugins-bad-libs libcolord ibus libibus"
+	libcups ffmpeg \
+	gst-libav gst-plugin-gtk gst-plugin-libcamera \
+	gst-plugin-msdk gst-plugin-opencv gst-plugins-bad \
+	gst-plugins-bad-libs gst-plugins-base gst-plugins-base-libs \
+	gst-plugins-espeak gst-plugins-good gst-plugins-ugly \
+	gstreamer libcolord ibus libibus"
 
 # If you want to install AUR packages, specify them in this variable
 export aur_packagelist=""
