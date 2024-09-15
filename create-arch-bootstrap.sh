@@ -32,10 +32,8 @@ devel_pkgs="base-devel git meson mingw-w64-gcc cmake gtk3"
 # You can add packages that you want and remove packages that you don't need
 # Apart from packages from the official Arch repos, you can also specify
 # packages from the Chaotic-AUR repo
-export packagelist="${audio_pkgs} libpng gnutls openal \
-	which ttf-dejavu ttf-liberation xorg-xwayland wayland \
-	xorg-server xorg-apps curl virtualbox-kvm v4l-utils \
- 	kvantum kvantum-qt5 qt5ct qt6ct libva sdl2 vulkan-icd-loader"
+export packagelist="${audio_pkgs} handbrake \
+	which ttf-dejavu ttf-liberation xorg-xwayland wayland"
 
 # If you want to install AUR packages, specify them in this variable
 export aur_packagelist=""
@@ -382,30 +380,6 @@ run_in_chroot pacman -Q > "${bootstrap}"/pkglist.x86_64.txt
 run_in_chroot rm -f "${bootstrap}"/etc/locale.conf
 run_in_chroot sed -i 's/LANG=${LANG:-C}/LANG=$LANG/g' /etc/profile.d/locale.sh
 
-# Fix locale
-mkdir -p "${bootstrap}"/usr/lib/virtualbox/nls
-rsync -av "${bootstrap}"/usr/share/virtualbox/nls/* "${bootstrap}"/usr/lib/virtualbox/nls/
-
-# Add guest additions
-vboxver=$(curl -Ls https://gitlab.com/chaotic-aur/pkgbuilds/-/raw/main/virtualbox-kvm/PKGBUILD | grep vboxver | head -1 | tr "'" '\n' | grep "^[0-9]")
-wget https://download.virtualbox.org/virtualbox/"${vboxver}"/VBoxGuestAdditions_"${vboxver}".iso -O ./VBoxGuestAdditions.iso || exit 1
-mkdir -p "${bootstrap}"/usr/lib/virtualbox/additions
-mv VBoxGuestAdditions.iso "${bootstrap}"/usr/lib/virtualbox/additions/ || exit 1
-
-# Add extension pack
-wget https://download.virtualbox.org/virtualbox/"${vboxver}"/Oracle_VM_VirtualBox_Extension_Pack-"${vboxver}".vbox-extpack -O ./Extension_Pack.tar
-mkdir -p shrunk
-tar xfC ./Extension_Pack.tar shrunk
-rm -r shrunk/{darwin*,solaris*,win*}
-tar -c --gzip --file shrunk.vbox-extpack -C shrunk .
-install -Dm 644 shrunk.vbox-extpack \
-	"${bootstrap}"/usr/share/virtualbox/extensions/Oracle_VM_VirtualBox_Extension_Pack-"${vboxver}".vbox-extpack
-install -Dm 644 shrunk/ExtPack-license.txt \
-	"${bootstrap}"/usr/share/licenses/virtualbox-ext-oracle/PUEL
-mkdir -p "${bootstrap}"/usr/lib/virtualbox/ExtensionPacks/Oracle_VM_VirtualBox_Extension_Pack/linux.amd64
-install -Dm 644 shrunk/linux.amd64/* \
-	"${bootstrap}"/usr/lib/virtualbox/ExtensionPacks/Oracle_VM_VirtualBox_Extension_Pack/linux.amd64/
-
 # Remove bloatwares
 run_in_chroot rm -Rf /usr/include /usr/share/man
 run_in_chroot bash -c 'find "${bootstrap}"/usr/share/doc/* -not -iname "*virtualbox*" -a -not -name "." -delete'
@@ -413,10 +387,10 @@ run_in_chroot bash -c 'find "${bootstrap}"/usr/share/locale/*/*/* -not -iname "*
 rm -rf "${bootstrap}"/usr/lib/*.a
 rm -rf "${bootstrap}"/usr/lib/bellagio
 rm -rf "${bootstrap}"/usr/lib/cmake/Qt*
-#rm -rf "${bootstrap}"/usr/lib/libgallium*
+rm -rf "${bootstrap}"/usr/lib/libgallium*
 rm -rf "${bootstrap}"/usr/lib/libgo.so*
 rm -rf "${bootstrap}"/usr/lib/libgphobos.so*
-#rm -rf "${bootstrap}"/usr/lib/libLLVM*
+rm -rf "${bootstrap}"/usr/lib/libLLVM*
 rm -rf "${bootstrap}"/usr/lib/systemd
 rm -rf "${bootstrap}"/usr/share/fonts/*
 rm -rf "${bootstrap}"/usr/share/gir-1.0
@@ -428,7 +402,7 @@ strip --strip-debug "${bootstrap}"/usr/lib32/*
 strip --strip-unneeded "${bootstrap}"/usr/bin/*
 
 # Check if the command we are interested in has been installed
-if ! run_in_chroot which virtualbox; then echo "Command not found, exiting." && exit 1; fi
+if ! run_in_chroot which ghb; then echo "Command not found, exiting." && exit 1; fi
 
 # Exit chroot
 rm -rf "${bootstrap}"/home/aur
