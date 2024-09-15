@@ -387,7 +387,7 @@ run_in_chroot bash -c 'find "${bootstrap}"/usr/share/locale/*/*/* -not -iname "*
 rm -rf "${bootstrap}"/usr/lib/*.a
 rm -rf "${bootstrap}"/usr/lib/bellagio
 rm -rf "${bootstrap}"/usr/lib/cmake/Qt*
-rm -rf "${bootstrap}"/usr/lib/libgallium*
+#rm -rf "${bootstrap}"/usr/lib/libgallium*
 rm -rf "${bootstrap}"/usr/lib/libgo.so*
 rm -rf "${bootstrap}"/usr/lib/libgphobos.so*
 rm -rf "${bootstrap}"/usr/lib/libLLVM*
