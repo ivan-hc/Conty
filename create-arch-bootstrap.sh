@@ -388,8 +388,8 @@ run_in_chroot sed -i 's/LANG=${LANG:-C}/LANG=$LANG/g' /etc/profile.d/locale.sh
 
 # Remove bloatwares
 run_in_chroot rm -Rf /usr/include /usr/share/man
-run_in_chroot bash -c 'find "${bootstrap}"/usr/share/doc/* -not -iname "*virtualbox*" -a -not -name "." -delete'
-run_in_chroot bash -c 'find "${bootstrap}"/usr/share/locale/*/*/* -not -iname "*virtualbox*" -a -not -name "." -delete'
+run_in_chroot bash -c 'find "${bootstrap}"/usr/share/doc/* -not -iname "*ghb*" -a -not -name "." -delete'
+run_in_chroot bash -c 'find "${bootstrap}"/usr/share/locale/*/*/* -not -iname "*ghb*" -a -not -name "." -delete'
 rm -rf "${bootstrap}"/usr/lib/*.a
 rm -rf "${bootstrap}"/usr/lib/bellagio
 rm -rf "${bootstrap}"/usr/lib/cmake/Qt*
