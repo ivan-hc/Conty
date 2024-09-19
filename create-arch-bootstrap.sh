@@ -32,14 +32,8 @@ devel_pkgs="base-devel git meson mingw-w64-gcc cmake gtk3"
 # You can add packages that you want and remove packages that you don't need
 # Apart from packages from the official Arch repos, you can also specify
 # packages from the Chaotic-AUR repo
-export packagelist="${audio_pkgs} handbrake \
-	which ttf-dejavu ttf-liberation xorg-xwayland wayland \
-	libcups ffmpeg \
-	gst-libav gst-plugin-gtk gst-plugin-libcamera \
-	gst-plugin-msdk gst-plugin-opencv gst-plugins-bad \
-	gst-plugins-bad-libs gst-plugins-base gst-plugins-base-libs \
-	gst-plugins-espeak gst-plugins-good gst-plugins-ugly \
-	gstreamer libcolord ibus libibus"
+export packagelist="${audio_pkgs} hypnotix circle-flags yt-dlp \
+	which ttf-dejavu ttf-liberation xorg-xwayland wayland"
 
 # If you want to install AUR packages, specify them in this variable
 export aur_packagelist=""
@@ -388,15 +382,15 @@ run_in_chroot sed -i 's/LANG=${LANG:-C}/LANG=$LANG/g' /etc/profile.d/locale.sh
 
 # Remove bloatwares
 run_in_chroot rm -Rf /usr/include /usr/share/man
-run_in_chroot bash -c 'find "${bootstrap}"/usr/share/doc/* -not -iname "*ghb*" -a -not -name "." -delete'
-run_in_chroot bash -c 'find "${bootstrap}"/usr/share/locale/*/*/* -not -iname "*ghb*" -a -not -name "." -delete'
+run_in_chroot bash -c 'find "${bootstrap}"/usr/share/doc/* -not -iname "*hypnotix*" -a -not -name "." -delete'
+run_in_chroot bash -c 'find "${bootstrap}"/usr/share/locale/*/*/* -not -iname "*hypnotix*" -a -not -name "." -delete'
 rm -rf "${bootstrap}"/usr/lib/*.a
 rm -rf "${bootstrap}"/usr/lib/bellagio
 rm -rf "${bootstrap}"/usr/lib/cmake/Qt*
-#rm -rf "${bootstrap}"/usr/lib/libgallium*
+rm -rf "${bootstrap}"/usr/lib/libgallium*
 rm -rf "${bootstrap}"/usr/lib/libgo.so*
 rm -rf "${bootstrap}"/usr/lib/libgphobos.so*
-#rm -rf "${bootstrap}"/usr/lib/libLLVM*
+rm -rf "${bootstrap}"/usr/lib/libLLVM*
 rm -rf "${bootstrap}"/usr/lib/systemd
 rm -rf "${bootstrap}"/usr/share/fonts/*
 rm -rf "${bootstrap}"/usr/share/gir-1.0
@@ -408,7 +402,7 @@ strip --strip-debug "${bootstrap}"/usr/lib32/*
 strip --strip-unneeded "${bootstrap}"/usr/bin/*
 
 # Check if the command we are interested in has been installed
-if ! run_in_chroot which ghb; then echo "Command not found, exiting." && exit 1; fi
+if ! run_in_chroot which hypnotix; then echo "Command not found, exiting." && exit 1; fi
 
 # Exit chroot
 rm -rf "${bootstrap}"/home/aur
