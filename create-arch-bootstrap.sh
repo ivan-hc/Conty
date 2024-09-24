@@ -32,11 +32,12 @@ devel_pkgs="base-devel git meson mingw-w64-gcc cmake gtk3"
 # You can add packages that you want and remove packages that you don't need
 # Apart from packages from the official Arch repos, you can also specify
 # packages from the Chaotic-AUR repo
-export packagelist="${audio_pkgs} hypnotix circle-flags yt-dlp \
-	which ttf-dejavu ttf-liberation xorg-xwayland wayland"
+export packagelist="${devel_pkgs} which ttf-dejavu ttf-liberation \
+	python python-gobject glib2 python-dbus python-graphene graphene python-cairo cairo fuse3 \
+	libadwaita ibus libibus file python-filetype desktop-file-utils util-linux psmisc"
 
 # If you want to install AUR packages, specify them in this variable
-export aur_packagelist=""
+export aur_packagelist="gearlever"
 
 # ALHP is a repository containing packages from the official Arch Linux
 # repos recompiled with -O3, LTO and optimizations for modern CPUs for
@@ -382,16 +383,17 @@ run_in_chroot sed -i 's/LANG=${LANG:-C}/LANG=$LANG/g' /etc/profile.d/locale.sh
 
 # Remove bloatwares
 run_in_chroot rm -Rf /usr/include /usr/share/man
-run_in_chroot bash -c 'find "${bootstrap}"/usr/share/doc/* -not -iname "*hypnotix*" -a -not -name "." -delete'
-run_in_chroot bash -c 'find "${bootstrap}"/usr/share/locale/*/*/* -not -iname "*hypnotix*" -a -not -name "." -delete'
+run_in_chroot bash -c 'find "${bootstrap}"/usr/share/doc/* -not -iname "*gearlever*" -a -not -name "." -delete'
+run_in_chroot bash -c 'find "${bootstrap}"/usr/share/locale/*/*/* -not -iname "*gearlever*" -a -not -name "." -delete'
 rm -rf "${bootstrap}"/usr/lib/*.a
 rm -rf "${bootstrap}"/usr/lib/bellagio
 rm -rf "${bootstrap}"/usr/lib/cmake/Qt*
-#rm -rf "${bootstrap}"/usr/lib/libgallium*
+rm -rf "${bootstrap}"/usr/lib/libgallium*
 rm -rf "${bootstrap}"/usr/lib/libgo.so*
 rm -rf "${bootstrap}"/usr/lib/libgphobos.so*
-#rm -rf "${bootstrap}"/usr/lib/libLLVM*
+rm -rf "${bootstrap}"/usr/lib/libLLVM*
 rm -rf "${bootstrap}"/usr/lib/systemd
+rm -rf "${bootstrap}"/usr/lib/gtk*/*/media/libmedia-gstreamer.so
 rm -rf "${bootstrap}"/usr/share/fonts/*
 rm -rf "${bootstrap}"/usr/share/gir-1.0
 rm -rf "${bootstrap}"/usr/share/i18n
