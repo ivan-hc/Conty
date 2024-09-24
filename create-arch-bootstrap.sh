@@ -404,7 +404,7 @@ strip --strip-debug "${bootstrap}"/usr/lib32/*
 strip --strip-unneeded "${bootstrap}"/usr/bin/*
 
 # Check if the command we are interested in has been installed
-if ! run_in_chroot which hypnotix; then echo "Command not found, exiting." && exit 1; fi
+if ! run_in_chroot which gearlever; then echo "Command not found, exiting." && exit 1; fi
 
 # Exit chroot
 rm -rf "${bootstrap}"/home/aur
