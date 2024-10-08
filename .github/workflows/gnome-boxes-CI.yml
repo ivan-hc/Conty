@@ -14,6 +14,8 @@ jobs:
 
     - name: Build Conty
       run: |
+        rm -Rf utils_dwarfs.tar.gz
+        wget -q https://github.com/ivan-hc/Conty/releases/download/utils/utils_dwarfs.tar.gz
         chmod +x create-arch-bootstrap.sh create-conty.sh
         sudo ./create-arch-bootstrap.sh && ./create-conty.sh
         
