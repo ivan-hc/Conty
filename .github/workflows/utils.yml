@@ -19,8 +19,8 @@ jobs:
       if: always()
       run: |
         chmod +x create-utils.sh
-        pacman -Syu --noconfirm --needed base-devel gawk grep lz4 zstd \
-                 curl gcc make autoconf libtool pkgconf libcap fuse2 lzo \
+        pacman -Syu --noconfirm --needed base-devel gawk grep lz4 zstd wget \
+                 curl gcc make autoconf libtool pkgconf libcap fuse2 lzo patch \
                  xz zlib findutils openssl jemalloc xxhash boost lz4 xz \
                  zstd libarchive libunwind google-glog gtest fmt gflags \
                  double-conversion cmake ruby-ronn libevent libdwarf git \
