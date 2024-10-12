@@ -58,6 +58,9 @@ if [ "${build_dwarfs}" != "true" ]; then
 fi
 
 cd bubblewrap-"${bwrap_version}" || exit 1
+# Apply bwrap patch
+wget -q https://raw.githubusercontent.com/Samueru-sama/Conty/refs/heads/master/caps.patch
+patch < caps.patch || exit 1             
 ./autogen.sh
 ./configure --disable-selinux --disable-man
 make -j"$(nproc)" DESTDIR="${script_dir}"/build-utils/bin install
