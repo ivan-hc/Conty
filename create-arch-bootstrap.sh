@@ -6,19 +6,51 @@
 ########################################################################
 
 # Package groups
-QTVER=$(curl -Ls https://gitlab.com/chaotic-aur/pkgbuilds/-/raw/main/virtualbox-kvm/PKGBUILD  | tr '"><' '\n' | sed "s/'/\n/g" | grep "^qt.*base$" | head -1)
-[ "$QTVER" = qt5-base ] && kvantumver="kvantum-qt5 qt5ct" || kvantumver="kvantum qt6ct"
+audio_pkgs="alsa-lib lib32-alsa-lib alsa-plugins lib32-alsa-plugins libpulse \
+	lib32-libpulse jack2 lib32-jack2 alsa-tools alsa-utils pipewire \
+	lib32-pipewire"
+
+video_pkgs="mesa lib32-mesa vulkan-radeon lib32-vulkan-radeon \
+	vulkan-intel lib32-vulkan-intel \
+	vulkan-icd-loader lib32-vulkan-icd-loader vulkan-mesa-layers \
+	lib32-vulkan-mesa-layers libva-mesa-driver lib32-libva-mesa-driver \
+	libva-intel-driver lib32-libva-intel-driver intel-media-driver \
+	mesa-utils vulkan-tools libva-utils lib32-mesa-utils"
+
+wine_pkgs="wine-staging winetricks-git wine-nine wineasio \
+	giflib lib32-giflib libpng lib32-libpng libldap lib32-libldap \
+	gnutls lib32-gnutls mpg123 lib32-mpg123 openal lib32-openal \
+	v4l-utils lib32-v4l-utils libpulse lib32-libpulse alsa-plugins \
+	lib32-alsa-plugins alsa-lib lib32-alsa-lib libjpeg-turbo \
+	lib32-libjpeg-turbo libxcomposite lib32-libxcomposite libxinerama \
+	lib32-libxinerama libxslt lib32-libxslt libva lib32-libva gtk3 \
+	lib32-gtk3 vulkan-icd-loader lib32-vulkan-icd-loader sdl2 lib32-sdl2 \
+	vkd3d lib32-vkd3d libgphoto2 ffmpeg gst-plugins-good gst-plugins-bad \
+	gst-plugins-ugly gst-plugins-base lib32-gst-plugins-good \
+	lib32-gst-plugins-base gst-libav wget gst-plugin-pipewire"
+
+wine32_pkgs="lib32-giflib lib32-libpng lib32-libldap lib32-gnutls mpg123 \
+	lib32-mpg123 lib32-openal lib32-v4l-utils lib32-libpulse \
+	lib32-alsa-plugins lib32-alsa-lib \
+	lib32-libjpeg-turbo lib32-libxcomposite \
+	lib32-libxinerama lib32-libxslt lib32-libva gtk3 \
+	lib32-gtk3 lib32-sdl2 lib32-vkd3d lib32-gst-plugins-good \
+	lib32-gst-plugins-base"
+
+devel_pkgs="base-devel git meson mingw-w64-gcc cmake"
 
 # Packages to install
 # You can add packages that you want and remove packages that you don't need
 # Apart from packages from the official Arch repos, you can also specify
 # packages from the Chaotic-AUR repo
-export packagelist="alsa-lib alsa-plugins libpulse jack2 alsa-tools alsa-utils pipewire \
-	libpng gnutls openal which xorg-xwayland wayland xorg-server xorg-apps \
- 	curl virtualbox-kvm v4l-utils $kvantumver libva sdl2"
+export packagelist="${audio_pkgs} ${wine32_pkgs} ${devel_pkgs} \
+	ttf-dejavu ttf-liberation xorg-xwayland gamemode lib32-gamemode wayland \
+	lib32-wayland xorg-server xorg-apps which ibus libpng v4l-utils libxslt \
+ 	vulkan-icd-loader lib32-vulkan-icd-loader gnutls openal libjpeg-turbo \
+	libva sdl2 xterm"
 
 # If you want to install AUR packages, specify them in this variable
-export aur_packagelist=""
+export aur_packagelist="bottles"
 
 # ALHP is a repository containing packages from the official Arch Linux
 # repos recompiled with -O3, LTO and optimizations for modern CPUs for
@@ -148,6 +180,36 @@ install_aur_packages () {
 	done
 }
 
+generate_localegen () {
+	cat <<EOF > locale.gen
+ar_EG.UTF-8 UTF-8
+en_US.UTF-8 UTF-8
+en_GB.UTF-8 UTF-8
+en_CA.UTF-8 UTF-8
+en_SG.UTF-8 UTF-8
+es_MX.UTF-8 UTF-8
+zh_CN.UTF-8 UTF-8
+fr_FR.UTF-8 UTF-8
+ru_RU.UTF-8 UTF-8
+ru_UA.UTF-8 UTF-8
+es_ES.UTF-8 UTF-8
+de_DE.UTF-8 UTF-8
+pt_BR.UTF-8 UTF-8
+it_IT.UTF-8 UTF-8
+id_ID.UTF-8 UTF-8
+ja_JP.UTF-8 UTF-8
+bg_BG.UTF-8 UTF-8
+pl_PL.UTF-8 UTF-8
+da_DK.UTF-8 UTF-8
+ko_KR.UTF-8 UTF-8
+tr_TR.UTF-8 UTF-8
+hu_HU.UTF-8 UTF-8
+cs_CZ.UTF-8 UTF-8
+bn_IN UTF-8
+hi_IN UTF-8
+EOF
+}
+
 generate_mirrorlist () {
 	cat <<EOF > mirrorlist
 Server = https://mirror1.sl-chat.ru/archlinux/\$repo/os/\$arch
@@ -213,6 +275,8 @@ rm archlinux-bootstrap-x86_64.tar.zst sha256sums.txt sha256.txt
 
 mount_chroot
 
+#generate_localegen
+
 if command -v reflector 1>/dev/null; then
 	echo "Generating mirrorlist..."
 	reflector --connection-timeout 10 --download-timeout 10 --protocol https --score 10 --sort rate --save mirrorlist
@@ -220,6 +284,9 @@ if command -v reflector 1>/dev/null; then
 else
 	generate_mirrorlist
 fi
+
+#rm "${bootstrap}"/etc/locale.gen
+#mv locale.gen "${bootstrap}"/etc/locale.gen
 
 rm "${bootstrap}"/etc/pacman.d/mirrorlist
 mv mirrorlist "${bootstrap}"/etc/pacman.d/mirrorlist
@@ -306,14 +373,14 @@ if [ -n "${aur_packagelist}" ]; then
 	export -f install_aur_packages
 	CHROOT_AUR=1 HOME=/home/aur run_in_chroot bash -c install_aur_packages
 	mv "${bootstrap}"/home/aur/bad_aur_pkglist.txt "${bootstrap}"/opt
+	#rm -rf "${bootstrap}"/home/aur
 fi
 
+#run_in_chroot locale-gen
+
 # Remove unneeded packages
-run_in_chroot pacman --noconfirm -Rsudd base-devel meson mingw-w64-gcc cmake gcc
+run_in_chroot pacman --noconfirm -Rsu base-devel meson mingw-w64-gcc cmake gcc
 run_in_chroot pacman --noconfirm -Rdd wine-staging
-run_in_chroot pacman --noconfirm -Rsndd gcc yay pacman systemd
-run_in_chroot pacman -Qdtq | run_in_chroot pacman --noconfirm -Rsn -
-run_in_chroot pacman --noconfirm -Rsndd pacman
 run_in_chroot pacman -Qdtq | run_in_chroot pacman --noconfirm -Rsn -
 run_in_chroot pacman --noconfirm -Scc
 
@@ -324,66 +391,41 @@ run_in_chroot pacman -Q > "${bootstrap}"/pkglist.x86_64.txt
 run_in_chroot rm -f "${bootstrap}"/etc/locale.conf
 run_in_chroot sed -i 's/LANG=${LANG:-C}/LANG=$LANG/g' /etc/profile.d/locale.sh
 
-# Fix locale
-mkdir -p "${bootstrap}"/usr/lib/virtualbox/nls
-rsync -av "${bootstrap}"/usr/share/virtualbox/nls/* "${bootstrap}"/usr/lib/virtualbox/nls/
-
-# Add guest additions
-vboxver=$(curl -Ls https://gitlab.com/chaotic-aur/pkgbuilds/-/raw/main/virtualbox-kvm/PKGBUILD | grep vboxver | head -1 | tr "'" '\n' | grep "^[0-9]")
-wget https://download.virtualbox.org/virtualbox/"${vboxver}"/VBoxGuestAdditions_"${vboxver}".iso -O ./VBoxGuestAdditions.iso || exit 1
-mkdir -p "${bootstrap}"/usr/lib/virtualbox/additions
-mv VBoxGuestAdditions.iso "${bootstrap}"/usr/lib/virtualbox/additions/ || exit 1
-
-# Add extension pack
-wget https://download.virtualbox.org/virtualbox/"${vboxver}"/Oracle_VM_VirtualBox_Extension_Pack-"${vboxver}".vbox-extpack -O ./Extension_Pack.tar
-mkdir -p shrunk
-tar xfC ./Extension_Pack.tar shrunk
-rm -r shrunk/{darwin*,solaris*,win*}
-tar -c --gzip --file shrunk.vbox-extpack -C shrunk .
-mkdir -p "${bootstrap}"/usr/share/virtualbox/extensions
-cp shrunk.vbox-extpack "${bootstrap}"/usr/share/virtualbox/extensions/Oracle_VM_VirtualBox_Extension_Pack-"${vboxver}".vbox-extpack
-mkdir -p "${bootstrap}"/usr/share/licenses/virtualbox-ext-oracle/
-cp shrunk/ExtPack-license.txt "${bootstrap}"/usr/share/licenses/virtualbox-ext-oracle/PUEL
-mkdir -p "${bootstrap}"/usr/lib/virtualbox/ExtensionPacks/Oracle_VM_VirtualBox_Extension_Pack
-rsync -av shrunk/* "${bootstrap}"/usr/lib/virtualbox/ExtensionPacks/Oracle_VM_VirtualBox_Extension_Pack/
+# Try to fix GTK/GDK error messages
+cp "${bootstrap}"/usr/lib/gtk-3.0/3.0.0/immodules/im-ibus.so "${bootstrap}"/usr/lib/
+cp "${bootstrap}"/usr/lib/gdk-pixbuf-2.0/2.10.0/loaders/libpixbufloader-* "${bootstrap}"/usr/lib/
 
 # Remove bloatwares
-run_in_chroot rm -Rf /usr/include /usr/share/man
-run_in_chroot bash -c 'find "${bootstrap}"/usr/share/doc/* -not -iname "*virtualbox*" -a -not -name "." -delete'
-run_in_chroot bash -c 'find "${bootstrap}"/usr/share/locale/*/*/* -not -iname "*virtualbox*" -a -not -name "." -delete'
+run_in_chroot pacman --noconfirm -Rsndd gcc yay pacman systemd
+run_in_chroot pacman -Qdtq | run_in_chroot pacman --noconfirm -Rsn -
+run_in_chroot pacman --noconfirm -Rsndd pacman
+run_in_chroot rm -Rf /usr/include /usr/share/man /usr/share/gtk-doc /usr/lib/gcc /usr/bin/gcc*
+run_in_chroot bash -c 'find "${bootstrap}"/usr/share/doc/* -not -iname "*bottles*" -a -not -name "." -delete'
+run_in_chroot bash -c 'find "${bootstrap}"/usr/share/locale/*/*/* -not -iname "*bottles*" -a -not -name "." -delete'
 rm -rf "${bootstrap}"/usr/lib/*.a
-rm -rf "${bootstrap}"/usr/lib/bellagio
-rm -rf "${bootstrap}"/usr/lib/cmake/Qt*
-#rm -rf "${bootstrap}"/usr/lib/libgallium*
 rm -rf "${bootstrap}"/usr/lib/libgo.so*
 rm -rf "${bootstrap}"/usr/lib/libgphobos.so*
-#rm -rf "${bootstrap}"/usr/lib/libLLVM*
+rm -rf "${bootstrap}"/usr/lib/libjavascript*
+rm -rf "${bootstrap}"/usr/lib/libwebkit*
+rm -rf "${bootstrap}"/usr/lib/perl*
+rm -rf "${bootstrap}"/usr/lib32/*.a
+rm -rf "${bootstrap}"/usr/lib32/libgo.so*
+rm -rf "${bootstrap}"/usr/lib32/libgphobos.so*
+rm -rf "${bootstrap}"/usr/share/ibus/dicts/emoji*
 rm -rf "${bootstrap}"/usr/lib/systemd
-rm -rf "${bootstrap}"/usr/share/fonts/*
-rm -rf "${bootstrap}"/usr/share/gir-1.0
-rm -rf "${bootstrap}"/usr/share/i18n
 rm -rf "${bootstrap}"/usr/share/info
-rm -rf "${bootstrap}"/usr/share/virtualbox/nls
-[ "$QTVER" = qt5-base ] && rm -rf "${bootstrap}"/usr/share/qt6 && rm -rf "${bootstrap}"/usr/share/Kvantum/* \
-	&& rm -rf "${bootstrap}"/usr/lib/qt6 && rm -rf "${bootstrap}"/usr/lib/*Qt6*
+rm -rf "${bootstrap}"/usr/share/gir-1.0
 rm -rf "${bootstrap}"/var/lib/pacman/*
-rm -rf "${bootstrap}"/usr/lib/python*/__pycache__/*
 find "${bootstrap}"/usr/lib "${bootstrap}"/usr/lib32 -type f -regex '.*\.a' -exec rm -f {} \;
 find "${bootstrap}"/usr -type f -regex '.*\.so.*' -exec strip --strip-debug {} \;
 find "${bootstrap}"/usr/bin -type f ! -regex '.*\.so.*' -exec strip --strip-unneeded {} \;
 
 # Check if the command we are interested in has been installed
-if ! run_in_chroot which virtualbox; then echo "Command not found, exiting." && exit 1; fi
+if ! run_in_chroot which bottles; then echo "Command not found, exiting." && exit 1; fi
 
 # Exit chroot
 rm -rf "${bootstrap}"/home/aur
 unmount_chroot
-
-# Use the patched bwrap to allow launching AppImages from conty
-echo "Using patched bubblewrap..."
-rm -f "${bootstrap}"/usr/bin/bwrap
-wget "https://bin.ajam.dev/x86_64_Linux/bwrap-patched" -O "${bootstrap}"/usr/bin/bwrap || exit 1
-chmod +x "${bootstrap}"/usr/bin/bwrap || exit 1
 
 # Clear pacman package cache
 rm -f "${bootstrap}"/var/cache/pacman/pkg/*
@@ -393,7 +435,6 @@ rm -f "${bootstrap}"/var/cache/pacman/pkg/*
 # later in the conty-start.sh script
 mkdir "${bootstrap}"/media
 mkdir -p "${bootstrap}"/usr/share/steam/compatibilitytools.d
-mkdir -p "${bootstrap}"/usr/share/Kvantum
 touch "${bootstrap}"/etc/asound.conf
 touch "${bootstrap}"/etc/localtime
 chmod 755 "${bootstrap}"/root
