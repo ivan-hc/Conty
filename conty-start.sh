@@ -533,7 +533,7 @@ if ([ "${USE_SYS_UTILS}" != 1 ] && [ "${utils_size}" -gt 0 ]) || [ "$1" = "-u" ]
 	fi
 
 	if [ "${dwarfs_image}" = 1 ]; then
-		mount_tool="${working_dir}"/utils/dwarfs"${fuse_version}"
+		mount_tool="${working_dir}"/utils/dwarfs
 		extraction_tool="${working_dir}"/utils/dwarfsextract
 		compression_tool="${working_dir}"/utils/mkdwarfs
 	else
