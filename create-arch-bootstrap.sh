@@ -13,12 +13,13 @@ video_pkgs="mesa lib32-mesa vulkan-radeon lib32-vulkan-radeon vulkan-intel \
 	lib32-vulkan-mesa-layers libva-mesa-driver lib32-libva-mesa-driver \
 	libva-intel-driver lib32-libva-intel-driver intel-media-driver"
 
-wine_pkgs="giflib lib32-giflib libpng lib32-libpng libldap lib32-libldap \
-	gnutls lib32-gnutls mpg123 lib32-mpg123 v4l-utils lib32-v4l-utils \
-	libpulse lib32-libpulse alsa-lib lib32-alsa-lib libjpeg-turbo \
-	lib32-libjpeg-turbo libxcomposite lib32-libxcomposite libxinerama \
-	libxslt lib32-libxslt libva lib32-libva vkd3d lib32-vkd3d \
-	ffmpeg wget"
+wine_pkgs="lib32-giflib lib32-libpng lib32-libldap lib32-gnutls mpg123 \
+	lib32-mpg123 lib32-openal lib32-v4l-utils lib32-libpulse \
+	lib32-alsa-plugins lib32-alsa-lib \
+	lib32-libjpeg-turbo lib32-libxcomposite \
+	lib32-libxinerama lib32-libxslt lib32-libva gtk3 \
+	lib32-gtk3 lib32-sdl2 lib32-vkd3d lib32-gst-plugins-good \
+	lib32-gst-plugins-base"
 
 devel_pkgs="base-devel git meson mingw-w64-gcc cmake"
 
@@ -26,7 +27,7 @@ devel_pkgs="base-devel git meson mingw-w64-gcc cmake"
 # You can add packages that you want and remove packages that you don't need
 # Apart from packages from the official Arch repos, you can also specify
 # packages from the Chaotic-AUR repo
-export packagelist="${audio_pkgs} ${video_pkgs} ${wine_pkgs} ${devel_pkgs} \
+export packagelist="${audio_pkgs} ${wine_pkgs} ${devel_pkgs} \
 	ttf-dejavu ttf-liberation xorg-xwayland gamemode lib32-gamemode wayland \
 	lib32-wayland xorg-server xorg-apps which ibus libpng v4l-utils libxslt \
  	lib32-vulkan-icd-loader gnutls openal libjpeg-turbo libva sdl2 xterm"
