@@ -22,7 +22,7 @@ squashfs_compressor_arguments=(-b 1M -comp ${squashfs_compressor} -Xcompression-
 # Use DwarFS instead of SquashFS
 dwarfs="true"
 dwarfs_compressor_arguments=(-l7 -C zstd:level=22 --metadata-compression null \
-                            -S 21 -B 1 --order nilsimsa \
+                            -S 24 -B 2 --order nilsimsa \
                             -W 12 -w 4 --no-create-timestamp)
 
 # Set to true to use an existing image if it exists
