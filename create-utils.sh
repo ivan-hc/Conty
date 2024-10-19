@@ -30,40 +30,17 @@ export LDFLAGS="-Wl,-O1,--sort-common,--as-needed"
 mkdir -p "${script_dir}"/build-utils
 cd "${script_dir}"/build-utils || exit 1
 
-curl -#Lo bwrap.tar.gz https://github.com/containers/bubblewrap/archive/refs/tags/v${bwrap_version}.tar.gz
-curl -#Lo busybox.tar.bz2 https://busybox.net/downloads/busybox-${busybox_version}.tar.bz2
-curl -#Lo bash.tar.gz https://ftp.gnu.org/gnu/bash/bash-${bash_version}.tar.gz
+
 cp "${script_dir}"/init.c init.c
-
-tar xf bwrap.tar.gz
-tar xf busybox.tar.bz2
-tar xf bash.tar.gz
-
-cd bubblewrap-"${bwrap_version}" || exit 1
-# Apply bwrap patch
-wget -q https://raw.githubusercontent.com/Samueru-sama/Conty/refs/heads/master/caps.patch
-patch < caps.patch || exit 1
-./autogen.sh
-./configure --disable-selinux --disable-man
-make -j"$(nproc)" DESTDIR="${script_dir}"/build-utils/bin install
-
-cd ../busybox-${busybox_version} || exit 1
-make defconfig
-sed -i 's/# CONFIG_STATIC is not set/CONFIG_STATIC=y/g' .config
-make CC=musl-gcc -j"$(nproc)"
-
-cd ../bash-${bash_version}
-curl -#Lo bash.patch "https://raw.githubusercontent.com/robxu9/bash-static/master/custom/bash-musl-strtoimax-debian-1023053.patch"
-patch -Np1 < ./bash.patch
-CFLAGS="${CFLAGS} -Wno-error=implicit-function-declaration -static" CC=musl-gcc ./configure --without-bash-malloc
-autoconf -f
-CFLAGS="${CFLAGS} -Wno-error=implicit-function-declaration -static" CC=musl-gcc ./configure --without-bash-malloc
-CFLAGS="${CFLAGS} -Wno-error=implicit-function-declaration -static" CC=musl-gcc make -j"$(nproc)"
 
 cd "${script_dir}"/build-utils || exit 1
 mkdir utils
-mv bin/usr/local/bin/bwrap utils
 
+# Download patched bubblewrap (allows launching appimages inside conty) 
+wget "https://bin.ajam.dev/x86_64_Linux/bwrap-patched" -O ./utils/bwrap
+
+wget "https://bin.ajam.dev/x86_64_Linux/bash" -O ./utils/bash
+wget "https://bin.ajam.dev/x86_64_Linux/Baseutils/busybox/busybox" -O ./utils/busybox
 wget "https://bin.ajam.dev/x86_64_Linux/Baseutils/unionfs-fuse/unionfs" -O ./utils/unionfs
 wget "https://bin.ajam.dev/x86_64_Linux/Baseutils/unionfs-fuse3/unionfs" -O ./utils/unionfs3
 wget "https://bin.ajam.dev/x86_64_Linux/dwarfs-tools" -O ./utils/dwarfs-tools
@@ -75,14 +52,6 @@ chmod +x ./utils/*
 mv "${script_dir}"/build-utils/busybox-${busybox_version}/busybox utils
 mv "${script_dir}"/build-utils/bash-${bash_version}/bash utils
 mv "${script_dir}"/build-utils/init utils
-
-mapfile -t libs_list < <(ldd utils/* | awk '/=> \// {print $3}')
-
-for i in "${libs_list[@]}"; do
-	if [ ! -f utils/"$(basename "${i}")" ]; then
-		cp -L "${i}" utils
-	fi
-done
 
 if [ ! -f utils/ld-linux-x86-64.so.2 ]; then
     cp -L /lib64/ld-linux-x86-64.so.2 utils
