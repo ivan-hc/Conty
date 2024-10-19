@@ -20,7 +20,7 @@ wine_pkgs="giflib lib32-giflib libpng lib32-libpng libldap lib32-libldap \
 	libxslt lib32-libxslt libva lib32-libva vkd3d lib32-vkd3d \
 	ffmpeg wget"
 
-devel_pkgs="base-devel"
+devel_pkgs="base-devel git meson mingw-w64-gcc cmake"
 
 # Packages to install
 # You can add packages that you want and remove packages that you don't need
