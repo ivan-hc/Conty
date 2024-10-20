@@ -825,6 +825,7 @@ run_bwrap () {
 			--ro-bind-try /etc/machine-id /etc/machine-id \
 			--ro-bind-try /etc/asound.conf /etc/asound.conf \
 			--ro-bind-try /etc/localtime /etc/localtime \
+  			--cap-add CAP_SYS_ADMIN \
 			"${non_standard_home[@]}" \
 			"${sandbox_params[@]}" \
 			"${custom_home[@]}" \
