@@ -816,7 +816,7 @@ run_bwrap () {
 			--bind-try /run /run \
 			--bind-try /var /var \
 			--bind-try /usr/lib/locale /usr/lib/locale \
-			--bind-try /usr/share/fonts /usr/share/fonts
+			--bind-try /usr/share/fonts /usr/share/fonts \
 			--ro-bind-try /usr/share/steam/compatibilitytools.d /usr/share/steam/compatibilitytools.d \
 			--ro-bind-try /etc/resolv.conf /etc/resolv.conf \
 			--ro-bind-try /etc/hosts /etc/hosts \
