@@ -21,7 +21,7 @@ squashfs_compressor_arguments=(-b 1M -comp ${squashfs_compressor} -Xcompression-
 
 # Use DwarFS instead of SquashFS
 dwarfs="true"
-dwarfs_compressor_arguments=(-l7 -C zstd:level=22 -S 25 -B 3 --no-create-timestamp)
+dwarfs_compressor_arguments=(-l7 -C zstd:level=22 -S 25 -B 8 --no-create-timestamp)
 
 # Set to true to use an existing image if it exists
 # Otherwise the script will always create a new image
