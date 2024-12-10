@@ -8,8 +8,6 @@ unset LD_PRELOAD LD_LIBRARY_PATH
 LC_ALL_ORIG="${LC_ALL}"
 export LC_ALL=C
 
-export PATH="/usr/sbin:${PATH}"
-
 msg_root="
 Do not run this script as root!
 
@@ -24,7 +22,7 @@ if (( EUID == 0 )) && [ -z "$ALLOW_ROOT" ]; then
 fi
 
 # Conty version
-script_version="1.27"
+script_version="1.26.2"
 
 # Important variables to manually adjust after modification!
 # Needed to avoid problems with mounting due to an incorrect offset.
@@ -33,9 +31,9 @@ script_version="1.27"
 # size to 0
 init_size=50000
 bash_size=1752808
-script_size=42559
+script_size=38502
 busybox_size=1181592
-utils_size=4393102
+utils_size=4392469
 
 # Full path to the script
 if [ -n "${BASH_SOURCE[0]}" ]; then
@@ -77,7 +75,7 @@ else
 	export working_dir="${BASE_DIR}"/"${conty_dir_name}"
 fi
 
-if [ "${USE_SYS_UTILS}" != 1 ] && [[ "${busybox_size}" -gt 0 ]]; then
+if [ "${USE_SYS_UTILS}" != 1 ] && [ "${busybox_size}" -gt 0 ]; then
 	busybox_bin_dir="${working_dir}"/busybox_bins
 	busybox_path="${busybox_bin_dir}"/busybox
 
@@ -190,19 +188,11 @@ Environment variables:
                     directory from there.
 
   NVIDIA_HANDLER    Fixes issues with graphical applications on Nvidia
-                    GPUs with the proprietary driver. At least 2 GB of
-                    free disk space is required for this function.
-                    This function is enabled by default on systems with
-                    an Nvidia GPU.
-                    Available modes:
-                      1. In this mode Conty downloads the
-                         driver from the official Nvidia website and
-                         installs it inside the container.
-                      2. In this mode Conty copies Nvidia libraries from
-                         the host system into the container.
-                    The default is 1 if there is an internet
-                    connection and the Nvidia website is accessible,
-                    otherwise the default is 2.
+                    GPUs with the proprietary driver. Enable this only
+                    if you are using an Nvidia GPU, the proprietary
+                    driver and encountering issues running graphical
+                    applications. At least 2 GB of free disk space is
+                    required. This function is enabled by default.
 
   USE_SYS_UTILS     Tells the script to use squashfuse/dwarfs and bwrap
                     installed on the system instead of the builtin ones.
@@ -237,6 +227,9 @@ arguments, to remove add a minus sign (-) before their names.
   To remove: ${script_name} -u -pkgname1 -pkgname2 -pkgname3 ...
 In this case Conty will update all packages and additionally install
 and/or remove specified packages.
+
+If you are using an Nvidia GPU, please read the following:
+https://github.com/Kron4ek/Conty#known-issues
 "
 
 if [ -n "${CUSTOM_MNT}" ] && [ -d "${CUSTOM_MNT}" ]; then
@@ -404,7 +397,7 @@ nvidia_driver_handler () {
 	curl -#Lo nvidia.run "${driver_url}"
 
 	# If the previous download failed, get the URL from FlatHub repo
-	if [ ! -s nvidia.run ] || [[ "$(stat -c%s nvidia.run)" -lt 30000000 ]]; then
+	if [ ! -s nvidia.run ] || [ "$(stat -c%s nvidia.run)" -lt 30000000 ]; then
 		rm -f nvidia.run
 		driver_url="https:$(curl -#Lo - "https://raw.githubusercontent.com/flathub/org.freedesktop.Platform.GL.nvidia/master/data/nvidia-${nvidia_driver_version}-x86_64.data" | cut -d ':' -f 6)"
 		curl -#Lo nvidia.run "${driver_url}"
@@ -422,14 +415,11 @@ nvidia_driver_handler () {
 			rm -rf "${nvidia_drivers_dir}"/nvidia.run "${nvidia_drivers_dir}"/nvidia-driver
 
 			if [ -s /usr/lib/libGLX_nvidia.so."${nvidia_driver_version}" ] || \
-			   [ -s /usr/lib/libGL.so."${nvidia_driver_version}" ] || \
-                           [ -s /usr/lib/libnvidia-glcore.so."${nvidia_driver_version}" ] || \
-			   [ -s /usr/lib/libnvidia-eglcore.so."${nvidia_driver_version}" ]; then
+			   [ -s /usr/lib/libGL.so."${nvidia_driver_version}" ]; then
 				cp /usr/lib/tls/libnvidia-tls.so.* /usr/lib &>/dev/null
 				cp /usr/lib32/tls/libnvidia-tls.so.* /usr/lib32 &>/dev/null
 				echo "${nvidia_driver_version}" > "${nvidia_drivers_dir}"/current-nvidia-version
 				echo "The driver installed successfully"
-				nvidia_install_success=1
 			else
 				echo "Failed to install the driver"
 			fi
@@ -438,10 +428,6 @@ nvidia_driver_handler () {
 		fi
 	else
 		echo "Failed to download the driver"
-	fi
-
-	if [ "${nvidia_install_success}" != 1 ]; then
-		rm -f "${nvidia_drivers_dir}"/current-nvidia-version
 	fi
 
 	cd "${OLD_PWD}"
@@ -493,17 +479,17 @@ if [ "${dwarfs_image}" = 1 ]; then
 	if getconf _PHYS_PAGES &>/dev/null && getconf PAGE_SIZE &>/dev/null; then
 		memory_size="$(($(getconf _PHYS_PAGES) * $(getconf PAGE_SIZE) / (1024 * 1024)))"
 
-		if [[ "${memory_size}" -ge 45000 ]]; then
+		if [ "${memory_size}" -ge 45000 ]; then
 			dwarfs_cache_size="4096M"
-		elif [[ "${memory_size}" -ge 23000 ]]; then
+		elif [ "${memory_size}" -ge 23000 ]; then
 			dwarfs_cache_size="2048M"
-		elif [[ "${memory_size}" -ge 15000 ]]; then
+		elif [ "${memory_size}" -ge 15000 ]; then
 			dwarfs_cache_size="1024M"
-		elif [[ "${memory_size}" -ge 7000 ]]; then
+		elif [ "${memory_size}" -ge 7000 ]; then
 			dwarfs_cache_size="512M"
-		elif [[ "${memory_size}" -ge 3000 ]]; then
+		elif [ "${memory_size}" -ge 3000 ]; then
 			dwarfs_cache_size="256M"
-		elif [[ "${memory_size}" -ge 1500 ]]; then
+		elif [ "${memory_size}" -ge 1500 ]; then
 			dwarfs_cache_size="128M"
 		else
 			dwarfs_cache_size="64M"
@@ -513,7 +499,7 @@ if [ "${dwarfs_image}" = 1 ]; then
 	if getconf _NPROCESSORS_ONLN &>/dev/null; then
 		dwarfs_num_workers="$(getconf _NPROCESSORS_ONLN)"
 
-		if [[ "${dwarfs_num_workers}" -ge 8 ]]; then
+		if [ "${dwarfs_num_workers}" -ge 8 ]; then
 			dwarfs_num_workers=8
 		fi
 	fi
@@ -522,7 +508,7 @@ fi
 # Extract utils.tar.gz
 mkdir -p "${working_dir}"
 
-if ([ "${USE_SYS_UTILS}" != 1 ] && [[ "${utils_size}" -gt 0 ]]) || [ "$1" = "-u" ]; then
+if ([ "${USE_SYS_UTILS}" != 1 ] && [ "${utils_size}" -gt 0 ]) || [ "$1" = "-u" ]; then
 	# Check if filesystem of the working_dir is mounted without noexec
 	if ! exec_test; then
 		if [ -z "${BASE_DIR}" ]; then
@@ -705,7 +691,7 @@ run_bwrap () {
 			sandbox_params+=(--dir "${HOME}")
 		fi
 
-		if [ -n "${SANDBOX_LEVEL}" ] && [[ "${SANDBOX_LEVEL}" -ge 2 ]]; then
+		if [ -n "${SANDBOX_LEVEL}" ] && [ "${SANDBOX_LEVEL}" -ge 2 ]; then
 			sandbox_level_msg="(level 2)"
 			sandbox_params+=(--dir "${XDG_RUNTIME_DIR}" \
                              --ro-bind-try "${XDG_RUNTIME_DIR}"/"${wayland_socket}" "${XDG_RUNTIME_DIR}"/"${wayland_socket}" \
@@ -720,7 +706,7 @@ run_bwrap () {
 							 --bind-try /run/dbus /run/dbus)
 		fi
 
-		if [ -n "${SANDBOX_LEVEL}" ] && [[ "${SANDBOX_LEVEL}" -ge 3 ]]; then
+		if [ -n "${SANDBOX_LEVEL}" ] && [ "${SANDBOX_LEVEL}" -ge 3 ]; then
 			sandbox_level_msg="(level 3)"
 			DISABLE_NET=1
 		fi
@@ -763,7 +749,7 @@ run_bwrap () {
 
 	if [ "${DISABLE_X11}" != 1 ]; then
 		if [ "$(ls /tmp/.X11-unix 2>/dev/null)" ]; then
-			if [ -n "${SANDBOX_LEVEL}" ] && [[ "${SANDBOX_LEVEL}" -ge 3 ]]; then
+			if [ -n "${SANDBOX_LEVEL}" ] && [ "${SANDBOX_LEVEL}" -ge 3 ]; then
 				xsockets+=(--ro-bind-try /tmp/.X11-unix/X"${xephyr_display}" /tmp/.X11-unix/X"${xephyr_display}" \
 						   --setenv "DISPLAY" :"${xephyr_display}")
 			else
@@ -786,7 +772,7 @@ run_bwrap () {
 		mount_opt=(--bind-try /opt /opt)
 	fi
 
-	if ([[ "${NVIDIA_HANDLER}" -ge 1 ]] || [ "${USE_OVERLAYFS}" = 1 ]) && \
+	if ([ "${NVIDIA_HANDLER}" = 1 ] || [ "${USE_OVERLAYFS}" = 1 ]) && \
 		[ "$(ls "${overlayfs_dir}"/merged 2>/dev/null)" ]; then
 		newroot_path="${overlayfs_dir}"/merged
 	else
@@ -849,7 +835,6 @@ run_bwrap () {
 			"${unshare_net[@]}" \
 			"${set_vars[@]}" \
 			--setenv PATH "${CUSTOM_PATH}" \
-   			--setenv XDG_DATA_DIRS "/usr/local/share:/usr/share:${XDG_DATA_DIRS}" \
 			"${command_line[@]}"
 }
 
@@ -986,7 +971,7 @@ if [ "$(ls "${mount_point}" 2>/dev/null)" ] || launch_wrapper "${mount_command[@
 						line="${line} (Conty)"
 					elif [ "${line_function}" = "Exec" ]; then
 						line="Exec=${variables}\"${script}\" $@ $(echo "${line}" | tail -c +6)"
-					elif [ "${line_function}" = "TryE" ]; then  # pragma: codespell-ignore
+					elif [ "${line_function}" = "TryE" ]; then
 						continue
 					fi
 
@@ -1045,7 +1030,7 @@ if [ "$(ls "${mount_point}" 2>/dev/null)" ] || launch_wrapper "${mount_command[@
 				available_disk_space="$(df -P -B1 "${PWD}" | awk 'END {print $4}')"
 				required_disk_space="$((current_file_size*7))"
 
-				if [[ "${available_disk_space}" -lt "${required_disk_space}" ]]; then
+				if [ "${available_disk_space}" -lt "${required_disk_space}" ]; then
 					echo "Not enough free disk space"
 					echo "You need at least $((required_disk_space/1024/1024)) MB of free space"
 					exit 1
@@ -1091,7 +1076,7 @@ if [ "$(ls "${mount_point}" 2>/dev/null)" ] || launch_wrapper "${mount_command[@
 			echo "Creating an image..."
 			launch_wrapper "${compression_command[@]}"
 
-			if [[ "${init_size}" -gt 0 ]]; then
+			if [ "${init_size}" -gt 0 ]; then
 				tail -c +$((init_size+bash_size+1)) "${script}" | head -c "${script_size}" > conty-start.sh
 			else
 				head -c "${script_size}" "${script}" > conty-start.sh
@@ -1133,7 +1118,7 @@ if [ "$(ls "${mount_point}" 2>/dev/null)" ] || launch_wrapper "${mount_command[@
 		exit
 	fi
 
-	if [[ "${NVIDIA_HANDLER}" -ge 1 ]]; then
+	if [ "${NVIDIA_HANDLER}" = 1 ]; then
 		if [ -f /sys/module/nvidia/version ]; then
 			unset NVIDIA_SHARED
 
@@ -1185,87 +1170,11 @@ if [ "$(ls "${mount_point}" 2>/dev/null)" ] || launch_wrapper "${mount_command[@
 					mkdir -p "${nvidia_drivers_dir}"
 					echo > "${nvidia_drivers_dir}"/lock
 
-					if [ "${NVIDIA_HANDLER}" = 1 ]; then
-						export nvidia_driver_version
-						export -f nvidia_driver_handler
-						DISABLE_NET=0 QUIET_MODE=1 RW_ROOT=1 run_bwrap --tmpfs /tmp --tmpfs /var --tmpfs /run \
-						--bind "${nvidia_drivers_dir}" "${nvidia_drivers_dir}" \
-						bash -c nvidia_driver_handler
-					fi
-
-					if [ "${NVIDIA_HANDLER}" = 2 ] || [ ! -f "${nvidia_drivers_dir}"/current-nvidia-version ]; then
-						if [ -f "${nvidia_drivers_dir}"/host_nvidia_libs ]; then
-							for f in $(cat "${nvidia_drivers_dir}"/host_nvidia_libs); do
-								libname="$(basename "${f}")"
-								rm -f "${overlayfs_dir}"/merged/usr/lib/"${libname}" \
-								      "${overlayfs_dir}"/merged/usr/lib32/"${libname}"
-							done
-						fi
-
-						rm -f "${nvidia_drivers_dir}"/host_nvidia_libs \
-						      "${nvidia_drivers_dir}"/host_libs
-
-						ldconfig -p > "${nvidia_drivers_dir}"/host_libs
-
-						if [ -s "${nvidia_drivers_dir}"/host_libs ]; then
-							grep -i "nvidia" "${nvidia_drivers_dir}"/host_libs | cut -d ">" -f 2 >> "${nvidia_drivers_dir}"/host_nvidia_libs
-
-							if [ -s "${nvidia_drivers_dir}"/host_nvidia_libs ]; then
-								echo "Copying Nvidia libraries from the host system, please wait..."
-
- 								grep -i "libcuda" "${nvidia_drivers_dir}"/host_libs | cut -d ">" -f 2 >> "${nvidia_drivers_dir}"/host_nvidia_libs
-
-								for f in $(grep "libnv" "${nvidia_drivers_dir}"/host_libs | cut -d ">" -f 2); do
-									if strings "${f}" | grep -qi -m 1 "nvidia" &>/dev/null; then
-										echo "${f}" >> "${nvidia_drivers_dir}"/host_nvidia_libs
-									fi
-								done
-
-								nvidia_lib_copied=0
-								for f in $(cat "${nvidia_drivers_dir}"/host_nvidia_libs); do
-									libname="$(basename "${f}")"
-
-									if file "$(readlink -f "${f}")" | grep "32-bit" &>/dev/null; then
-										cp -L "${f}" "${overlayfs_dir}"/merged/usr/lib32/"${libname}" 2>/dev/null
-									else
-										cp -L "${f}" "${overlayfs_dir}"/merged/usr/lib/"${libname}" 2>/dev/null && nvidia_lib_copied=1
-									fi
-								done
-
-								nvidia_other_files="/usr/share/vulkan/icd.d/nvidia_icd.json \
-								                    /usr/share/vulkan/implicit_layer.d/nvidia_layers.json \
-								                    /usr/lib/nvidia/wine/nvngx.dll \
-								                    /usr/lib/nvidia/wine/_nvngx.dll \
-								                    /usr/share/egl/egl_external_platform.d/20_nvidia_xcb.json \
-								                    /usr/share/glvnd/egl_vendor.d/10_nvidia.json \
-								                    /usr/share/nvidia/nvidia-application-profiles-${nvidia_driver_version}-rc"
-
-								for f in ${nvidia_other_files}; do
-									filedir="$(dirname "${f}")"
-
-									if [ -f "${f}" ]; then
-										filepath="${f}"
-									else
-										filepath="$(find /usr /run /nix -name "$(basename "${f}")" -type f -print -quit 2>/dev/null)"
-									fi
-
-									if [ -f "${filepath}" ]; then
-										mkdir -p "${overlayfs_dir}"/merged/"${filedir}"
-										cp -L "${filepath}" "${overlayfs_dir}"/merged/"${filedir}" &>/dev/null
-										cp -L "$(dirname "${filepath}")"/*nvidia* "${overlayfs_dir}"/merged/"${filedir}" &>/dev/null
-									fi
-								done
-
-								if [ "${nvidia_lib_copied}" = 1 ]; then
-									echo "${nvidia_driver_version}" > "${nvidia_drivers_dir}"/current-nvidia-version
-	 							else
-	 								echo "Failed to copy Nvidia libraries"
-	  							fi
-							else
-       								echo "Nvidia libraries not found on the host system"
-	       						fi
-						fi
-					fi
+					export nvidia_driver_version
+					export -f nvidia_driver_handler
+					DISABLE_NET=0 QUIET_MODE=1 RW_ROOT=1 run_bwrap --tmpfs /tmp --tmpfs /var --tmpfs /run \
+					--bind "${nvidia_drivers_dir}" "${nvidia_drivers_dir}" \
+					bash -c nvidia_driver_handler
 
 					rm -f "${nvidia_drivers_dir}"/lock
 				fi
@@ -1310,7 +1219,7 @@ if [ "$(ls "${mount_point}" 2>/dev/null)" ] || launch_wrapper "${mount_command[@
 	fi
 
 	# If SANDBOX_LEVEL is 3, run Xephyr and openbox before running applications
-	if [ "${SANDBOX}" = 1 ] && [ -n "${SANDBOX_LEVEL}" ] && [[ "${SANDBOX_LEVEL}" -ge 3 ]]; then
+	if [ "${SANDBOX}" = 1 ] && [ -n "${SANDBOX_LEVEL}" ] && [ "${SANDBOX_LEVEL}" -ge 3 ]; then
 		if [ -f "${mount_point}"/usr/bin/Xephyr ]; then
 			if [ -z "${XEPHYR_SIZE}" ]; then
 				XEPHYR_SIZE="800x600"
