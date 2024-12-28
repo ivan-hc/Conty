@@ -6,9 +6,6 @@
 ########################################################################
 
 # Package groups
-QTVER=$(curl -Ls https://gitlab.com/chaotic-aur/pkgbuilds/-/raw/main/virtualbox-kvm/PKGBUILD  | tr '"><' '\n' | sed "s/'/\n/g" | grep "^qt.*base$" | head -1)
-[ "$QTVER" = qt5-base ] && kvantumver="kvantum-qt5 qt5ct" || kvantumver="kvantum qt6ct"
-
 audio_pkgs="alsa-lib alsa-plugins libpulse jack2 alsa-tools alsa-utils pipewire "
 
 video_pkgs="mesa vulkan-icd-loader vulkan-mesa-layers libva-mesa-driver libva-intel-driver"
@@ -326,33 +323,8 @@ run_in_chroot pacman -Q > "${bootstrap}"/pkglist.x86_64.txt
 run_in_chroot rm -f "${bootstrap}"/etc/locale.conf
 run_in_chroot sed -i 's/LANG=${LANG:-C}/LANG=$LANG/g' /etc/profile.d/locale.sh
 
-# Fix locale
-mkdir -p "${bootstrap}"/usr/lib/virtualbox/nls
-rsync -av "${bootstrap}"/usr/share/virtualbox/nls/* "${bootstrap}"/usr/lib/virtualbox/nls/
-
-# Add guest additions
-vboxver=$(curl -Ls https://gitlab.com/chaotic-aur/pkgbuilds/-/raw/main/virtualbox-kvm/PKGBUILD | grep vboxver | head -1 | tr "'" '\n' | grep "^[0-9]")
-wget https://download.virtualbox.org/virtualbox/"${vboxver}"/VBoxGuestAdditions_"${vboxver}".iso -O ./VBoxGuestAdditions.iso || exit 1
-mkdir -p "${bootstrap}"/usr/lib/virtualbox/additions
-mv VBoxGuestAdditions.iso "${bootstrap}"/usr/lib/virtualbox/additions/ || exit 1
-
-# Add extension pack
-wget https://download.virtualbox.org/virtualbox/"${vboxver}"/Oracle_VM_VirtualBox_Extension_Pack-"${vboxver}".vbox-extpack -O ./Extension_Pack.tar
-mkdir -p shrunk
-tar xfC ./Extension_Pack.tar shrunk
-rm -r shrunk/{darwin*,solaris*,win*}
-tar -c --gzip --file shrunk.vbox-extpack -C shrunk .
-mkdir -p "${bootstrap}"/usr/share/virtualbox/extensions
-cp shrunk.vbox-extpack "${bootstrap}"/usr/share/virtualbox/extensions/Oracle_VM_VirtualBox_Extension_Pack-"${vboxver}".vbox-extpack
-mkdir -p "${bootstrap}"/usr/share/licenses/virtualbox-ext-oracle/
-cp shrunk/ExtPack-license.txt "${bootstrap}"/usr/share/licenses/virtualbox-ext-oracle/PUEL
-mkdir -p "${bootstrap}"/usr/lib/virtualbox/ExtensionPacks/Oracle_VM_VirtualBox_Extension_Pack
-rsync -av shrunk/* "${bootstrap}"/usr/lib/virtualbox/ExtensionPacks/Oracle_VM_VirtualBox_Extension_Pack/
-
 # Remove bloatwares
 run_in_chroot rm -Rf /usr/include /usr/share/man
-run_in_chroot bash -c 'find "${bootstrap}"/usr/share/doc/* -not -iname "*virtualbox*" -a -not -name "." -delete'
-run_in_chroot bash -c 'find "${bootstrap}"/usr/share/locale/*/*/* -not -iname "*virtualbox*" -a -not -name "." -delete'
 rm -rf "${bootstrap}"/usr/lib/*.a
 rm -rf "${bootstrap}"/usr/lib/bellagio
 rm -rf "${bootstrap}"/usr/lib/cmake/Qt*
@@ -361,13 +333,12 @@ rm -rf "${bootstrap}"/usr/lib/libgo.so*
 rm -rf "${bootstrap}"/usr/lib/libgphobos.so*
 #rm -rf "${bootstrap}"/usr/lib/libLLVM*
 rm -rf "${bootstrap}"/usr/lib/systemd
+rm -rf "${bootstrap}"/usr/share/doc/*
 rm -rf "${bootstrap}"/usr/share/fonts/*
 rm -rf "${bootstrap}"/usr/share/gir-1.0
 rm -rf "${bootstrap}"/usr/share/i18n
 rm -rf "${bootstrap}"/usr/share/info
-rm -rf "${bootstrap}"/usr/share/virtualbox/nls
-[ "$QTVER" = qt5-base ] && rm -rf "${bootstrap}"/usr/share/qt6 && rm -rf "${bootstrap}"/usr/share/Kvantum/* \
-	&& rm -rf "${bootstrap}"/usr/lib/qt6 && rm -rf "${bootstrap}"/usr/lib/*Qt6*
+rm -rf "${bootstrap}"/usr/share/locale/*
 rm -rf "${bootstrap}"/var/lib/pacman/*
 rm -rf "${bootstrap}"/usr/lib/python*/__pycache__/*
 find "${bootstrap}"/usr/lib "${bootstrap}"/usr/lib32 -type f -regex '.*\.a' -exec rm -f {} \;
@@ -375,7 +346,7 @@ find "${bootstrap}"/usr -type f -regex '.*\.so.*' -exec strip --strip-debug {} \
 find "${bootstrap}"/usr/bin -type f ! -regex '.*\.so.*' -exec strip --strip-unneeded {} \;
 
 # Check if the command we are interested in has been installed
-if ! run_in_chroot which virtualbox; then echo "Command not found, exiting." && exit 1; fi
+if ! run_in_chroot which which; then echo "Command not found, exiting." && exit 1; fi
 
 # Exit chroot
 rm -rf "${bootstrap}"/home/aur
