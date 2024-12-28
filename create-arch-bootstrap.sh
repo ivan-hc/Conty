@@ -17,7 +17,7 @@ video_pkgs="mesa vulkan-icd-loader vulkan-mesa-layers libva-mesa-driver libva-in
 # You can add packages that you want and remove packages that you don't need
 # Apart from packages from the official Arch repos, you can also specify
 # packages from the Chaotic-AUR repo
-export packagelist=""
+export packagelist="curl"
 
 # If you want to install AUR packages, specify them in this variable
 export aur_packagelist=""
