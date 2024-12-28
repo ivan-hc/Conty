@@ -14,7 +14,7 @@ video_pkgs="mesa vulkan-icd-loader vulkan-mesa-layers libva-mesa-driver libva-in
 # You can add packages that you want and remove packages that you don't need
 # Apart from packages from the official Arch repos, you can also specify
 # packages from the Chaotic-AUR repo
-export packagelist="which"
+export packagelist="bubblewrap which"
 
 # If you want to install AUR packages, specify them in this variable
 export aur_packagelist=""
@@ -308,8 +308,7 @@ if [ -n "${aur_packagelist}" ]; then
 fi
 
 # Remove unneeded packages
-run_in_chroot pacman --noconfirm -Rsudd base-devel meson mingw-w64-gcc cmake gcc
-run_in_chroot pacman --noconfirm -Rdd wine-staging
+run_in_chroot pacman --noconfirm -Rsudd base-devel meson mingw-w64-gcc cmake gcc python
 run_in_chroot pacman --noconfirm -Rsndd gcc yay pacman systemd
 run_in_chroot pacman -Qdtq | run_in_chroot pacman --noconfirm -Rsn -
 run_in_chroot pacman --noconfirm -Rsndd pacman
@@ -340,13 +339,13 @@ rm -rf "${bootstrap}"/usr/share/i18n
 rm -rf "${bootstrap}"/usr/share/info
 rm -rf "${bootstrap}"/usr/share/locale/*
 rm -rf "${bootstrap}"/var/lib/pacman/*
-rm -rf "${bootstrap}"/usr/lib/python*/__pycache__/*
+rm -rf "${bootstrap}"/usr/lib/*python*
 find "${bootstrap}"/usr/lib "${bootstrap}"/usr/lib32 -type f -regex '.*\.a' -exec rm -f {} \;
 find "${bootstrap}"/usr -type f -regex '.*\.so.*' -exec strip --strip-debug {} \;
 find "${bootstrap}"/usr/bin -type f ! -regex '.*\.so.*' -exec strip --strip-unneeded {} \;
 
 # Check if the command we are interested in has been installed
-if ! run_in_chroot which which; then echo "Command not found, exiting." && exit 1; fi
+if ! run_in_chroot which bwrap; then echo "Command not found, exiting." && exit 1; fi
 
 # Exit chroot
 rm -rf "${bootstrap}"/home/aur
